@@ -1,0 +1,11 @@
+ARTÍCULO 56: Falta de constitución y de denuncia de domicilio: Si no se cumpliere con la constitución de domicilio procesal y domicilio electrónico, las sucesivas resoluciones se tendrán por notificadas en forma automática, por ministerio de la ley. Lo mismo regirá para quien, notificado del traslado de la demanda no compareciere a estar a derecho.
+
+Si la parte no denunciare su domicilio real o su cambio, las resoluciones que deban notificarse en dicho domicilio se cumplirán en el lugar en que se hubiere constituido el procesal y, en defecto también de éste, se observará lo dispuesto en el primer párrafo.
+
+ARTÍCULO 57: Subsistencia de los domicilios: Los domicilios subsistirán para todos los efectos legales mientras no se constituyan o denuncien otros.
+
+Todo cambio de domicilio deberá notificarse a la otra parte. Mientras esta diligencia no se hubiese cumplido, se tendrá por subsistente el anterior, salvo el caso en que quedara sin efecto el domicilio procesal constituido y no se constituyera uno nuevo, en que las notificaciones se harán ministerio de la ley.
+
+Cuando no existieren los edificios, quedaran deshabitados, desaparecieran, se alterare o suprimiere su numeración y no se hubiese constituido o denunciado un nuevo domicilio, con el informe del notificador se observará lo dispuesto en el primero o segundo párrafo del artículo anterior, según se trate, respectivamente, del domicilio procesal o del real.
+
+Cuando la notificación por medio electrónico sea devuelta por un servidor por cualquier motivo, se notificará en el correo secundario que se constituya o en su defecto, en el caso de existir multiplicidad de domicilios secundarios, en el que disponga el Juzgado interviniente. Si aún persistiera la imposibilidad de notificar, el sistema presentará un mensaje de error, el que deberá ser notificado al domicilio procesal constituido en la causa, bajo apercibimiento de que las siguientes notificaciones serán cumplidas por ministerio de la ley.
