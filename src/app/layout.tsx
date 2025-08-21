@@ -92,7 +92,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#15803d" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3195662668662265" crossorigin="anonymous"></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3195662668662265" crossOrigin="anonymous"></script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
