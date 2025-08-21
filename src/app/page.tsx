@@ -2,10 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import React from "react";
 import { FaCheckCircle, FaRegClock, FaRandom, FaUser } from "react-icons/fa";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const DURATION_SECONDS = 4 * 60; // 4 minutos
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [inputText, setInputText] = useState("");
   const [practiceText, setPracticeText] = useState("");
   const [isLocked, setIsLocked] = useState(false);
@@ -234,9 +236,34 @@ export default function Home() {
               <path d="M0 12 L25 12" stroke="white" stroke-width="1" opacity="0.2"/>
             </svg>
           </div>
-          <div className="flex items-center justify-center w-10 h-10 cursor-pointer hover:bg-white/20 rounded-full border-2 border-white transition-colors">
-            <FaUser className="text-white text-lg" />
-          </div>
+                      <div className="flex items-center justify-center w-10 h-10 cursor-pointer hover:bg-white/20 rounded-full border-2 border-white transition-colors">
+              {session ? (
+                <div className="flex items-center gap-2">
+                  {session.user?.image ? (
+                    <img 
+                      src={session.user.image} 
+                      alt={session.user.name || "Usuario"} 
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <FaUser className="text-white text-lg" />
+                  )}
+                  <button 
+                    onClick={() => signOut()}
+                    className="text-white text-xs hover:underline"
+                  >
+                    Salir
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => signIn('google')}
+                  className="text-white text-xs hover:underline"
+                >
+                  Entrar
+                </button>
+              )}
+            </div>
         </div>
       </header>
       

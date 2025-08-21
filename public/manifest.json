@@ -1,0 +1,24 @@
+{
+  "name": "DACTILO - Práctica de Dactilografía",
+  "short_name": "DACTILO",
+  "description": "Mejora tu velocidad de tipeo con DACTILO. Practica dactilografía con textos legales, mide tu WPM y perfecciona tu técnica de escritura.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#15803d",
+  "theme_color": "#15803d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "es-AR",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}
+
