@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "ejercicios de dactilografía",
     "mejorar velocidad de escritura"
   ],
-  authors: [{ name: "Julio Acosta", email: "julioacostapallud@gmail.com" }],
+  authors: [{ name: "Julio Acosta" }],
   creator: "Julio Acosta",
   publisher: "DACTILO",
   formatDetection: {
