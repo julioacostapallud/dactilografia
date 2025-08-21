@@ -1,0 +1,314 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// 1. USUARIOS Y AUTENTICACIÓN (NextAuth)
+// ========================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  accounts      Account[]
+  sessions      Session[]
+  practiceSessions PracticeSession[]
+  pageVisits    PageVisit[]
+  userEvents    UserEvent[]
+  adImpressions AdImpression[]
+  adClicks      AdClick[]
+  userStatistics UserStatistics?
+  userAchievements UserAchievement[]
+  userPreferences UserPreferences?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ========================================
+// 2. TEXTOS DE PRÁCTICA
+// ========================================
+
+model TextCategory {
+  id              Int           @id @default(autoincrement())
+  name            String        @db.VarChar(100)
+  description     String?
+  difficultyLevel Int           @default(1) // 1-5
+  createdAt       DateTime      @default(now())
+  
+  // Relaciones
+  practiceTexts   PracticeText[]
+
+  @@map("text_categories")
+}
+
+model PracticeText {
+  id              Int           @id @default(autoincrement())
+  title           String        @db.VarChar(255)
+  content         String        @db.Text
+  wordCount       Int
+  categoryId      Int?
+  difficultyLevel Int           @default(1) // 1-5
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relaciones
+  category        TextCategory? @relation(fields: [categoryId], references: [id])
+  practiceSessions PracticeSession[]
+
+  @@map("practice_texts")
+}
+
+// ========================================
+// 3. SESIONES DE PRÁCTICA
+// ========================================
+
+model PracticeSession {
+  id              Int       @id @default(autoincrement())
+  userId          String?
+  textId          Int?
+  sessionStart    DateTime  @default(now())
+  sessionEnd      DateTime?
+  durationSeconds Int?
+  totalWords      Int
+  correctWords    Int
+  wpm             Decimal?  @db.Decimal(5, 2)
+  accuracyPercentage Decimal? @db.Decimal(5, 2)
+  isCompleted     Boolean   @default(false)
+  deviceInfo      Json?
+  browserInfo     Json?
+  ipAddress       String?   @db.Inet
+  userAgent       String?   @db.Text
+  createdAt       DateTime  @default(now())
+  
+  // Relaciones
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  text            PracticeText? @relation(fields: [textId], references: [id])
+  wordDetails     SessionWordDetail[]
+
+  @@map("practice_sessions")
+}
+
+model SessionWordDetail {
+  id              Int       @id @default(autoincrement())
+  sessionId       Int
+  wordPosition    Int
+  targetWord      String    @db.VarChar(255)
+  typedWord       String?   @db.VarChar(255)
+  isCorrect       Boolean
+  timeToTypeMs    Int?
+  createdAt       DateTime  @default(now())
+  
+  // Relaciones
+  session         PracticeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_word_details")
+}
+
+// ========================================
+// 4. ANÁLISIS DE VISITAS
+// ========================================
+
+model PageVisit {
+  id                Int       @id @default(autoincrement())
+  userId            String?
+  pageUrl           String    @db.VarChar(500)
+  referrerUrl       String?   @db.VarChar(500)
+  ipAddress         String?   @db.Inet
+  userAgent         String?   @db.Text
+  deviceType        String?   @db.VarChar(50)
+  browser           String?   @db.VarChar(100)
+  os                String?   @db.VarChar(100)
+  country           String?   @db.VarChar(100)
+  city              String?   @db.VarChar(100)
+  sessionId         String?   @db.VarChar(255)
+  visitStart        DateTime  @default(now())
+  visitEnd          DateTime?
+  timeOnPageSeconds Int?
+  
+  // Relaciones
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("page_visits")
+}
+
+model UserEvent {
+  id        Int      @id @default(autoincrement())
+  userId    String?
+  eventType String   @db.VarChar(100)
+  eventData Json?
+  pageUrl   String?  @db.VarChar(500)
+  ipAddress String?  @db.Inet
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+  
+  // Relaciones
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("user_events")
+}
+
+// ========================================
+// 5. MÉTRICAS DE MONETIZACIÓN
+// ========================================
+
+model AdImpression {
+  id              Int       @id @default(autoincrement())
+  userId          String?
+  adSlotId        String    @db.VarChar(100)
+  adUnitId        String?   @db.VarChar(100)
+  pageUrl         String    @db.VarChar(500)
+  ipAddress       String?   @db.Inet
+  userAgent       String?   @db.Text
+  deviceType      String?   @db.VarChar(50)
+  country         String?   @db.VarChar(100)
+  impressionTime  DateTime  @default(now())
+  revenueEstimate Decimal?  @db.Decimal(10, 4)
+  
+  // Relaciones
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  adClicks        AdClick[]
+
+  @@map("ad_impressions")
+}
+
+model AdClick {
+  id              Int       @id @default(autoincrement())
+  impressionId    Int?
+  userId          String?
+  adSlotId        String    @db.VarChar(100)
+  clickTime       DateTime  @default(now())
+  revenueEstimate Decimal?  @db.Decimal(10, 4)
+  
+  // Relaciones
+  impression      AdImpression? @relation(fields: [impressionId], references: [id])
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("ad_clicks")
+}
+
+// ========================================
+// 6. PROGRESO Y ESTADÍSTICAS
+// ========================================
+
+model UserStatistics {
+  id                    Int      @id @default(autoincrement())
+  userId                String   @unique
+  totalSessions         Int      @default(0)
+  totalPracticeTimeMinutes Int   @default(0)
+  totalWordsTyped       Int      @default(0)
+  totalCorrectWords     Int      @default(0)
+  averageWpm            Decimal  @default(0) @db.Decimal(5, 2)
+  bestWpm               Decimal  @default(0) @db.Decimal(5, 2)
+  averageAccuracy       Decimal  @default(0) @db.Decimal(5, 2)
+  lastPracticeDate      DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relaciones
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_statistics")
+}
+
+model Achievement {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String?
+  iconUrl     String?  @db.VarChar(500)
+  criteria    Json?
+  createdAt   DateTime @default(now())
+  
+  // Relaciones
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  userId        String
+  achievementId Int
+  earnedAt      DateTime    @default(now())
+  
+  // Relaciones
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+// ========================================
+// 7. CONFIGURACIONES Y PREFERENCIAS
+// ========================================
+
+model UserPreferences {
+  id                Int      @id @default(autoincrement())
+  userId            String   @unique
+  practiceDurationMinutes Int @default(4)
+  preferredTextCategories Int[] // Array de category_ids
+  theme             String   @default("default") @db.VarChar(50)
+  soundEnabled      Boolean  @default(true)
+  autoSaveProgress  Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relaciones
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
