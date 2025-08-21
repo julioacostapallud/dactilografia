@@ -321,6 +321,18 @@ export default function Home() {
           <div className="text-center text-gray-500">
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
+            {/* AdSense Ad Unit - Left Sidebar */}
+            <ins 
+              className="adsbygoogle"
+              style={{ display: 'block' }}
+              data-ad-client="ca-pub-3195662668662265"
+              data-ad-slot="9852913988"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            />
+            <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
           </div>
         </div>
         
@@ -371,6 +383,18 @@ export default function Home() {
           <div className="text-center text-gray-500">
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
+            {/* AdSense Ad Unit - Right Sidebar */}
+            <ins 
+              className="adsbygoogle"
+              style={{ display: 'block' }}
+              data-ad-client="ca-pub-3195662668662265"
+              data-ad-slot="8179055454"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            />
+            <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
           </div>
         </div>
       </div>
