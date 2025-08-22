@@ -128,7 +128,7 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
           {/* Footer */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-500">
-              © 2024 Julio Acosta - DACTILO
+              © {new Date().getFullYear()} Julio Acosta - DACTILO
             </p>
           </div>
         </div>

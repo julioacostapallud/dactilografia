@@ -404,7 +404,7 @@ export default function Home() {
       <footer className="bg-gradient-to-r from-green-700 via-green-600 to-orange-600 text-white py-4">
         <div className="flex justify-between items-center px-6">
           <div className="text-sm text-white">
-            © 2024 Julio Acosta - julioacostapallud@gmail.com
+            © {new Date().getFullYear()} Julio Acosta - julioacostapallud@gmail.com
           </div>
           <div className="flex items-center gap-4 text-sm text-white">
             <span>Donaciones:</span>
