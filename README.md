@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dactilografía - Frontend
 
-## Getting Started
+Aplicación web para práctica de dactilografía desarrollada con Next.js 15, TypeScript y Tailwind CSS.
 
-First, run the development server:
+## Características
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🎯 Práctica de dactilografía con textos reales
+- 📊 Seguimiento de progreso y estadísticas
+- 🏆 Sistema de logros y recompensas
+- 👤 Autenticación con NextAuth.js
+- 📱 Diseño responsive y moderno
+- ⚡ Optimizado con Turbopack
+
+## Tecnologías
+
+- **Framework**: Next.js 15 con App Router
+- **Lenguaje**: TypeScript
+- **Estilos**: Tailwind CSS v4
+- **Autenticación**: NextAuth.js
+- **Base de datos**: PostgreSQL con Prisma
+- **Deployment**: Vercel
+
+## Instalación
+
+1. Clona el repositorio
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Configura las variables de entorno:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Ejecuta las migraciones de Prisma:
+   ```bash
+   npx prisma migrate dev
+   ```
+5. Inicia el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+
+## Scripts Disponibles
+
+- `npm run dev` - Inicia el servidor de desarrollo con Turbopack
+- `npm run build` - Construye la aplicación para producción
+- `npm run start` - Inicia el servidor de producción
+- `npm run lint` - Ejecuta el linter
+
+## Estructura del Proyecto
+
+```
+src/
+├── app/                 # App Router de Next.js
+│   ├── api/            # API routes
+│   ├── components/     # Componentes reutilizables
+│   └── ...
+├── components/         # Componentes adicionales
+└── ...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de Entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Desarrollo local (.env.local):
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Producción (Vercel):
+```
+NEXT_PUBLIC_API_URL=https://dactilo-backend.vercel.app
+```
 
-## Learn More
+### NextAuth (opcional):
+- `NEXTAUTH_SECRET` - Secreto para NextAuth.js
+- `NEXTAUTH_URL` - URL de la aplicación
 
-To learn more about Next.js, take a look at the following resources:
+## Contribución
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork el proyecto
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
+5. Abre un Pull Request
