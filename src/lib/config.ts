@@ -1,7 +1,6 @@
-// Configuración de la API - usando backend externo en Vercel
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://dactilo-backend.vercel.app' 
-  : 'http://localhost:3001';
+// Configuración de la API - usando backend de Vercel
+// Tanto en desarrollo como en producción usamos el backend de Vercel
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://dactilo-backend.vercel.app';
 
 export const API_ENDPOINTS = {
   pageVisits: '/api/page-visits',
