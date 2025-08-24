@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
-import { API_BASE_URL, API_ENDPOINTS } from '../../lib/config';
+import { API_BASE_URL } from '../../lib/config';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { FaUsers, FaClock, FaChartLine, FaDesktop, FaMobile, FaTablet, FaChrome, FaFirefox, FaSafari, FaEdge, FaGlobe, FaEye } from 'react-icons/fa';
+import { FaUsers, FaClock, FaChartLine, FaGlobe, FaEye } from 'react-icons/fa';
 
 interface AnalyticsData {
   summary: {

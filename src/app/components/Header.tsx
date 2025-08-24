@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FaUser } from "react-icons/fa";
 
@@ -26,15 +27,15 @@ export default function Header() {
             
             {/* Navegación */}
             <nav className="hidden md:flex space-x-6">
-              <a href="/" className="text-white hover:text-blue-200 transition-colors font-medium">
+              <Link href="/" className="text-white hover:text-blue-200 transition-colors font-medium">
                 Inicio
-              </a>
-              <a href="/about" className="text-white hover:text-blue-200 transition-colors font-medium">
+              </Link>
+              <Link href="/about" className="text-white hover:text-blue-200 transition-colors font-medium">
                 Acerca de
-              </a>
-              <a href="/contact" className="text-white hover:text-blue-200 transition-colors font-medium">
+              </Link>
+              <Link href="/contact" className="text-white hover:text-blue-200 transition-colors font-medium">
                 Contacto
-              </a>
+              </Link>
             </nav>
           </div>
         <div className="flex items-center justify-center w-10 h-10 cursor-pointer hover:bg-white/20 rounded-full border-2 border-white transition-colors">

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -81,12 +82,12 @@ export default function AboutPage() {
             <p className="text-blue-100 mb-6">
               Únete a miles de usuarios que ya han mejorado sus habilidades de dactilografía con DACTILO.
             </p>
-            <a 
+            <Link 
               href="/" 
               className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Empezar a Practicar
-            </a>
+            </Link>
           </div>
         </div>
       </div>
