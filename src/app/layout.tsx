@@ -28,7 +28,13 @@ export const metadata: Metadata = {
     "técnica de tipeo",
     "palabras por minuto",
     "ejercicios de dactilografía",
-    "mejorar velocidad de escritura"
+    "mejorar velocidad de escritura",
+    "curso de mecanografía",
+    "práctica de tipeo",
+    "velocidad de escritura",
+    "textos para practicar",
+    "dactilografía online",
+    "mecanografía gratuita"
   ],
   authors: [{ name: "Julio Acosta" }],
   creator: "Julio Acosta",
