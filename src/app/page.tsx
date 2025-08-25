@@ -1,13 +1,13 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import React from "react";
-import { FaCheckCircle, FaRegClock, FaRandom, FaUser } from "react-icons/fa";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { FaRegClock, FaRandom } from "react-icons/fa";
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 const DURATION_SECONDS = 4 * 60; // 4 minutos
 
 export default function Home() {
-  const { data: session, status } = useSession();
   const [inputText, setInputText] = useState("");
   const [practiceText, setPracticeText] = useState("");
   const [isLocked, setIsLocked] = useState(false);
@@ -220,52 +220,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col text-black">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-green-700 via-green-500 via-orange-500 to-orange-600 shadow-md px-6 py-4">
-        <div className="flex justify-between items-center w-full">
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-white">DACTILO</h1>
-            {/* Icono: Teclado + Velocidad */}
-            <svg width="40" height="20" viewBox="0 0 40 20" className="cursor-pointer hover:scale-110 transition-transform">
-              <rect x="0" y="0" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
-              <rect x="9" y="0" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
-              <rect x="18" y="0" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
-              <rect x="27" y="0" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
-              <path d="M0 8 L35 8" stroke="white" stroke-width="1" opacity="0.6"/>
-              <path d="M0 10 L30 10" stroke="white" stroke-width="1" opacity="0.4"/>
-              <path d="M0 12 L25 12" stroke="white" stroke-width="1" opacity="0.2"/>
-            </svg>
-          </div>
-                      <div className="flex items-center justify-center w-10 h-10 cursor-pointer hover:bg-white/20 rounded-full border-2 border-white transition-colors">
-              {session ? (
-                <div className="flex items-center gap-2">
-                  {session.user?.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "Usuario"} 
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <FaUser className="text-white text-lg" />
-                  )}
-                  <button 
-                    onClick={() => signOut()}
-                    className="text-white text-xs hover:underline"
-                  >
-                    Salir
-                  </button>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => signIn('google')}
-                  className="text-white text-xs hover:underline"
-                >
-                  Entrar
-                </button>
-              )}
-            </div>
-        </div>
-      </header>
+      <Header />
       
       {/* Contenido principal */}
       <div className="flex flex-col items-center p-2 pt-4 bg-gradient-to-br from-green-100/30 via-green-50/50 to-orange-100/30 flex-1 w-full">
@@ -400,23 +355,7 @@ export default function Home() {
       </div>
       </div>
       
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-green-700 via-green-600 to-orange-600 text-white py-4">
-        <div className="flex justify-between items-center px-6">
-          <div className="text-sm text-white">
-            © {new Date().getFullYear()} Julio Acosta - julioacostapallud@gmail.com
-          </div>
-          <div className="flex items-center gap-4 text-sm text-white">
-            <span>Donaciones:</span>
-            <button 
-              onClick={() => window.open('https://buymeacoffee.com/julioacosta', '_blank')}
-              className="hover:scale-110 transition-transform cursor-pointer bg-orange-500 hover:bg-orange-600 px-3 py-1 rounded-lg text-white font-medium"
-            >
-              ☕ Invítame un café
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
