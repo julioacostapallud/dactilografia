@@ -1,10 +1,7 @@
+'use client';
+
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
-export const metadata = {
-  title: 'Contacto - DACTILO',
-  description: 'Contacta con el equipo de DACTILO. Estamos aquí para ayudarte con cualquier consulta sobre nuestra plataforma de práctica de dactilografía.',
-};
 
 export default function ContactPage() {
   return (

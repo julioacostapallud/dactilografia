@@ -1,11 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
-export const metadata = {
-  title: 'Acerca de DACTILO - Práctica de Dactilografía',
-  description: 'Conoce más sobre DACTILO, la plataforma gratuita para mejorar tu velocidad de tipeo y dactilografía con textos legales.',
-};
 
 export default function AboutPage() {
   return (
