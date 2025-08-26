@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
+
 
 const handler = NextAuth({
   providers: [
@@ -21,8 +21,8 @@ const handler = NextAuth({
         }
 
         try {
-          // Conectar con el backend para validar credenciales
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validate`, {
+          // Conectar con el endpoint local para validar credenciales
+          const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/validate`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const handler = NextAuth({
       console.log("Token:", JSON.stringify(token, null, 2));
       console.log("=======================");
       
-      (session as { accessToken?: string }).accessToken = token.accessToken;
+      (session as { accessToken?: string }).accessToken = token.accessToken as string | undefined;
       return session;
     },
     async signIn({ user, account, profile }) {

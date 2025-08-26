@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { FaChartLine, FaHistory, FaTrophy, FaTimes } from 'react-icons/fa';
 
 interface OnboardingModalProps {

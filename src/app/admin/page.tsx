@@ -46,7 +46,7 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <div className="flex-1 bg-gradient-to-br from-green-100/30 via-green-50/50 to-orange-100/30">
+                        <div className="flex-1 bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header del panel */}
           <div className="mb-8">

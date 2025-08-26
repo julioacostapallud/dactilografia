@@ -11,7 +11,7 @@ interface AuthModalProps {
   setAuthMode?: (mode: 'login' | 'register') => void;
 }
 
-export default function AuthModal({ isOpen, onClose, mode, setAuthMode }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -46,7 +46,7 @@ export default function AuthModal({ isOpen, onClose, mode, setAuthMode }: AuthMo
         redirect: false,
       });
       // El modal se cerrará automáticamente cuando la sesión esté lista
-    } catch (error) {
+    } catch {
       setError('Error al iniciar sesión con Google');
     } finally {
       setIsLoading(false);
@@ -101,7 +101,7 @@ export default function AuthModal({ isOpen, onClose, mode, setAuthMode }: AuthMo
           setError('Credenciales inválidas');
         }
       }
-    } catch (error) {
+    } catch {
       setError(mode === 'register' ? 'Error al crear la cuenta' : 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);

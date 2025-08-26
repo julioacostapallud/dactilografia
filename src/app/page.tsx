@@ -354,7 +354,7 @@ export default function Home() {
 
       
       {/* Contenido principal */}
-      <div className="flex flex-col items-center p-2 pt-4 bg-gradient-to-br from-green-100/30 via-green-50/50 to-orange-100/30 flex-1 w-full">
+      <div className="flex flex-col items-center p-2 pt-4 bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30 flex-1 w-full">
         
 
       {/* Controles y selectores en una sola fila */}
