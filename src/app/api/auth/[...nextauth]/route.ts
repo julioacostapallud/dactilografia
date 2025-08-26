@@ -64,7 +64,7 @@ const handler = NextAuth({
       (session as { accessToken?: string }).accessToken = token.accessToken as string | undefined;
       return session;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       // Custom logic to handle user creation/update in your database
       if (account?.provider === "google") {
         try {

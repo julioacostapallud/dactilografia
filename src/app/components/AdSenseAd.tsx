@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 // Declaración de tipo para Google AdSense
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: unknown[];
   }
 }
 

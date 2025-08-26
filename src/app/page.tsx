@@ -25,7 +25,6 @@ export default function Home() {
   const [wpm, setWpm] = useState(0);
   const [correctWords, setCorrectWords] = useState(0);
   const [isLoadingText, setIsLoadingText] = useState(false);
-  const [currentEjercicio, setCurrentEjercicio] = useState<Ejercicio | null>(null);
   const [currentPrueba, setCurrentPrueba] = useState<Prueba | null>(null);
   const [currentTextoPrueba, setCurrentTextoPrueba] = useState<TextoPrueba | null>(null);
   const [instituciones, setInstituciones] = useState<Institucion[]>([]);
