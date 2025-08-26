@@ -9,11 +9,7 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const { isAuthenticated, isLoading, requireAuth } = useAuth();
-
-  useEffect(() => {
-    requireAuth();
-  }, [requireAuth]);
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -29,7 +25,16 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect to login via requireAuth
+    return (
+      fallback || (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30">
+          <div className="text-center">
+            <div className="text-red-500 mb-4">⚠️</div>
+            <p className="text-red-600">Acceso denegado. Debes iniciar sesión.</p>
+          </div>
+        </div>
+      )
+    );
   }
 
   return <>{children}</>;
