@@ -44,7 +44,6 @@ export default function Home() {
         // Si hay una prueba seleccionada, cargar texto de esa prueba
         const textoPrueba = await apiService.getTextoPruebaAleatorio(currentPrueba.id);
         if (textoPrueba) {
-          setCurrentTextoPrueba(textoPrueba);
           setPracticeText(textoPrueba.texto.trim());
         } else {
           console.error('No se encontraron textos para esta prueba');

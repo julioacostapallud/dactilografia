@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useEffect } from "react";
 
 interface AuthGuardProps {
   children: React.ReactNode;
