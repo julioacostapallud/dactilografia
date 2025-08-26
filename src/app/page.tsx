@@ -53,7 +53,6 @@ export default function Home() {
         // Fallback al sistema anterior
         const ejercicio = await apiService.getEjercicioAleatorio();
         if (ejercicio) {
-          setCurrentEjercicio(ejercicio);
           setPracticeText(ejercicio.texto.trim());
         } else {
           console.error('No se encontraron ejercicios disponibles');
@@ -297,8 +296,8 @@ export default function Home() {
   // Funciones para la selección de práctica
   const handleSelectPractice = (prueba: Prueba) => {
     setCurrentPrueba(prueba);
-    setCurrentEjercicio(null); // Limpiar ejercicio anterior
-    setCurrentTextoPrueba(null); // Limpiar texto anterior
+          // Limpiar ejercicio anterior
+            // Limpiar texto anterior
     setPracticeText(""); // Limpiar texto actual
     setDurationSeconds(prueba.minutos * 60); // Actualizar duración
     setTimer(prueba.minutos * 60); // Actualizar timer según la prueba
