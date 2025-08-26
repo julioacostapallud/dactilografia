@@ -4,47 +4,105 @@ import React from "react";
 import { FaRegClock, FaRandom } from "react-icons/fa";
 import Header from './components/Header';
 import Footer from './components/Footer';
+import OnboardingModal from './components/OnboardingModal';
 
-const DURATION_SECONDS = 4 * 60; // 4 minutos
+import { apiService, Ejercicio, Prueba, TextoPrueba, Institucion } from '@/lib/api';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { usePageVisit } from '@/lib/hooks/usePageVisit';
+import AdSenseAd from './components/AdSenseAd';
+
+const DEFAULT_DURATION_SECONDS = 4 * 60; // 4 minutos por defecto
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
+  usePageVisit('/');
   const [inputText, setInputText] = useState("");
   const [practiceText, setPracticeText] = useState("");
   const [isLocked, setIsLocked] = useState(false);
-  const [timer, setTimer] = useState(DURATION_SECONDS);
+  const [durationSeconds, setDurationSeconds] = useState(DEFAULT_DURATION_SECONDS);
+  const [timer, setTimer] = useState(DEFAULT_DURATION_SECONDS);
   const [isRunning, setIsRunning] = useState(false);
   const [wpm, setWpm] = useState(0);
   const [correctWords, setCorrectWords] = useState(0);
   const [isLoadingText, setIsLoadingText] = useState(false);
+  const [currentEjercicio, setCurrentEjercicio] = useState<Ejercicio | null>(null);
+  const [currentPrueba, setCurrentPrueba] = useState<Prueba | null>(null);
+  const [currentTextoPrueba, setCurrentTextoPrueba] = useState<TextoPrueba | null>(null);
+  const [instituciones, setInstituciones] = useState<Institucion[]>([]);
+  const [pruebas, setPruebas] = useState<Prueba[]>([]);
+  const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const textContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Función para cargar un texto aleatorio
+  // Función para cargar un texto aleatorio desde la API
   const loadRandomText = async () => {
     if (isLocked) return; // No cambiar texto durante la práctica
     
     setIsLoadingText(true);
     try {
-      const randomNumber = Math.floor(Math.random() * 15) + 1;
-      const response = await fetch(`/textos/texto${randomNumber}.txt`);
-      if (response.ok) {
-        const text = await response.text();
-        setPracticeText(text.trim());
+      if (currentPrueba) {
+        // Si hay una prueba seleccionada, cargar texto de esa prueba
+        const textoPrueba = await apiService.getTextoPruebaAleatorio(currentPrueba.id);
+        if (textoPrueba) {
+          setCurrentTextoPrueba(textoPrueba);
+          setPracticeText(textoPrueba.texto.trim());
+        } else {
+          console.error('No se encontraron textos para esta prueba');
+          setPracticeText("No hay textos disponibles para esta prueba. Selecciona otra práctica.");
+        }
       } else {
-        console.error('Error cargando texto:', response.status);
+        // Fallback al sistema anterior
+        const ejercicio = await apiService.getEjercicioAleatorio();
+        if (ejercicio) {
+          setCurrentEjercicio(ejercicio);
+          setPracticeText(ejercicio.texto.trim());
+        } else {
+          console.error('No se encontraron ejercicios disponibles');
+          setPracticeText("La práctica hace al maestro. Cada día que practicas, mejoras un poco más.");
+        }
       }
     } catch (error) {
       console.error('Error cargando texto:', error);
+      setPracticeText("Error al cargar el texto. Intenta seleccionar otra práctica.");
     } finally {
       setIsLoadingText(false);
     }
   };
 
+  // Cargar instituciones al montar el componente
+  useEffect(() => {
+    loadInstituciones();
+  }, []);
+
+  // Cargar pruebas cuando se selecciona una institución
+  useEffect(() => {
+    if (selectedInstitucionId) {
+      loadPruebas(selectedInstitucionId);
+    } else {
+      setPruebas([]);
+    }
+  }, [selectedInstitucionId]);
+
   // Cargar texto aleatorio al montar el componente
   useEffect(() => {
     loadRandomText();
   }, []);
+
+  // Mostrar onboarding si el usuario no está autenticado y es su primera visita
+  useEffect(() => {
+    if (!isAuthenticated && typeof window !== 'undefined') {
+      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+      if (!hasSeenOnboarding) {
+        // Mostrar onboarding después de 5 segundos (menos intrusivo)
+        const timer = setTimeout(() => {
+          setShowOnboarding(true);
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isAuthenticated]);
 
   // Iniciar la práctica
   const startPractice = () => {
@@ -52,7 +110,7 @@ export default function Home() {
     setIsLocked(true);
     setIsRunning(true);
     setInputText("");
-    setTimer(DURATION_SECONDS);
+    setTimer(durationSeconds);
     setWpm(0);
     setCorrectWords(0);
     setTimeout(() => {
@@ -65,7 +123,7 @@ export default function Home() {
     setIsLocked(false);
     setIsRunning(false);
     setInputText("");
-    setTimer(DURATION_SECONDS);
+    setTimer(durationSeconds);
     setWpm(0);
     setCorrectWords(0);
   };
@@ -74,6 +132,16 @@ export default function Home() {
   const finishPractice = () => {
     setIsLocked(false);
     setIsRunning(false);
+    
+    // Si el usuario no está autenticado, mostrar onboarding después de la práctica
+    if (!isAuthenticated && typeof window !== 'undefined') {
+      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+      if (!hasSeenOnboarding) {
+        setTimeout(() => {
+          setShowOnboarding(true);
+        }, 1000);
+      }
+    }
   };
 
   // Temporizador
@@ -142,7 +210,7 @@ export default function Home() {
     const states = getWordStates();
     setCorrectWords(states.filter((s) => s.status === "correct").length);
     const inputWords = inputText.trim().split(/\s+/);
-    const minutes = (DURATION_SECONDS - timer) / 60;
+    const minutes = (durationSeconds - timer) / 60;
     setWpm(minutes > 0 ? Math.round(inputWords.length / minutes) : 0);
   }, [inputText, isRunning, timer, practiceText]);
 
@@ -218,54 +286,153 @@ export default function Home() {
     );
   }
 
+  // Funciones para el onboarding
+  const handleOnboardingRegister = () => {
+    setShowOnboarding(false);
+    // Redirigir a la página de login
+    window.location.href = '/login';
+  };
+
+  const handleOnboardingClose = () => {
+    setShowOnboarding(false);
+  };
+
+  // Funciones para la selección de práctica
+  const handleSelectPractice = (prueba: Prueba) => {
+    setCurrentPrueba(prueba);
+    setCurrentEjercicio(null); // Limpiar ejercicio anterior
+    setCurrentTextoPrueba(null); // Limpiar texto anterior
+    setPracticeText(""); // Limpiar texto actual
+    setDurationSeconds(prueba.minutos * 60); // Actualizar duración
+    setTimer(prueba.minutos * 60); // Actualizar timer según la prueba
+  };
+
+
+
+  // Funciones para cargar instituciones y pruebas
+  const loadInstituciones = async () => {
+    try {
+      const data = await apiService.getInstituciones();
+      setInstituciones(data);
+    } catch (error) {
+      console.error('Error cargando instituciones:', error);
+    }
+  };
+
+  const loadPruebas = async (institucionId: number) => {
+    try {
+      const data = await apiService.getPruebas(institucionId);
+      setPruebas(data);
+    } catch (error) {
+      console.error('Error cargando pruebas:', error);
+    }
+  };
+
+  const handleInstitucionChange = (institucionId: number) => {
+    setSelectedInstitucionId(institucionId);
+    setCurrentPrueba(null); // Limpiar prueba seleccionada
+  };
+
+  const handlePruebaChange = (pruebaId: number) => {
+    const prueba = pruebas.find(p => p.id === pruebaId);
+    if (prueba) {
+      handleSelectPractice(prueba);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col text-black">
       <Header />
       
+      {/* Modal de Onboarding */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={handleOnboardingClose}
+        onRegister={handleOnboardingRegister}
+      />
+      
+
+      
       {/* Contenido principal */}
       <div className="flex flex-col items-center p-2 pt-4 bg-gradient-to-br from-green-100/30 via-green-50/50 to-orange-100/30 flex-1 w-full">
-      {/* Controles y métricas arriba */}
-      <div className="flex w-full max-w-5xl gap-4 mb-4 items-center justify-between">
-        <div className="flex gap-6 items-center">
+        
+
+      {/* Controles y selectores en una sola fila */}
+      <div className="flex w-full max-w-5xl gap-4 mb-4 items-center">
+        {/* Selectores de práctica */}
+        <div className="flex gap-3 flex-1">
+          <select
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            value={selectedInstitucionId || ''}
+            onChange={(e) => handleInstitucionChange(Number(e.target.value))}
+            disabled={isLocked}
+          >
+            <option value="">Institución</option>
+            {instituciones.map((institucion) => (
+              <option key={institucion.id} value={institucion.id}>
+                {institucion.nombre} - {institucion.provincia}
+              </option>
+            ))}
+          </select>
+          
+          <select
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            value={currentPrueba?.id || ''}
+            onChange={(e) => handlePruebaChange(Number(e.target.value))}
+            disabled={!selectedInstitucionId || isLocked}
+          >
+            <option value="">Prueba</option>
+            {pruebas.map((prueba) => (
+              <option key={prueba.id} value={prueba.id}>
+                {prueba.nombre} ({prueba.minutos}min)
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Botones de control */}
+        <div className="flex gap-3 items-center">
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400"
+            className="px-3 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400 text-sm"
             onClick={startPractice}
             disabled={isLocked || !practiceText.trim()}
           >
             Iniciar
           </button>
           <button
-            className="px-4 py-2 bg-gray-500 text-white rounded disabled:bg-gray-300"
+            className="px-3 py-2 bg-gray-500 text-white rounded disabled:bg-gray-300 text-sm"
             onClick={cancelPractice}
             disabled={!isLocked}
           >
             Cancelar
           </button>
           <button
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:bg-gray-400"
+            className="px-3 py-2 bg-green-600 text-white rounded disabled:bg-gray-400 text-sm"
             onClick={finishPractice}
             disabled={!isLocked}
           >
             Finalizar
           </button>
           <button
-            className="px-4 py-2 bg-purple-600 text-white rounded disabled:bg-gray-400 flex items-center gap-2"
+            className="px-3 py-2 bg-purple-600 text-white rounded disabled:bg-gray-400 flex items-center gap-1 text-sm"
             onClick={loadRandomText}
             disabled={isLocked || isLoadingText}
           >
-            <FaRandom className="text-sm" />
-            {isLoadingText ? 'Cargando...' : 'Nuevo Texto'}
+            <FaRandom className="text-xs" />
+            {isLoadingText ? 'Cargando...' : 'Nuevo'}
           </button>
         </div>
-        <div className="flex flex-row items-center gap-8 min-w-[350px] justify-end">
+
+        {/* Métricas */}
+        <div className="flex items-center gap-6">
           <div className="flex flex-col items-center">
-            <span className="text-black text-base font-normal">WPM</span>
-            <span className="font-mono text-3xl text-blue-600 font-bold">{wpm}</span>
+            <span className="text-black text-sm font-normal">WPM</span>
+            <span className="font-mono text-2xl text-blue-600 font-bold">{wpm}</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-black text-base font-normal">Tiempo</span>
-            <span className="flex items-center gap-1 font-mono text-3xl text-red-600 font-bold">
-              <FaRegClock className="text-red-500 text-2xl" /> {formatTime(timer)}
+            <span className="text-black text-sm font-normal">Tiempo</span>
+            <span className="flex items-center gap-1 font-mono text-2xl text-red-600 font-bold">
+              <FaRegClock className="text-red-500 text-xl" /> {formatTime(timer)}
             </span>
           </div>
         </div>
@@ -277,17 +444,7 @@ export default function Home() {
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
             {/* AdSense Ad Unit - Left Sidebar */}
-            <ins 
-              className="adsbygoogle"
-              style={{ display: 'block' }}
-              data-ad-client="ca-pub-3195662668662265"
-              data-ad-slot="9852913988"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            />
-            <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <AdSenseAd adSlot="9852913988" />
           </div>
         </div>
         
@@ -295,7 +452,9 @@ export default function Home() {
         <div className="flex gap-4 max-w-5xl flex-1">
           {/* Lado izquierdo: texto a tipear */}
           <div className="flex-1 flex flex-col">
-            <label className="font-semibold mb-2">Texto para practicar:</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-semibold">Texto para practicar:</label>
+            </div>
             {isLocked ? (
               <RenderMarkedText />
             ) : (
@@ -339,17 +498,7 @@ export default function Home() {
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
             {/* AdSense Ad Unit - Right Sidebar */}
-            <ins 
-              className="adsbygoogle"
-              style={{ display: 'block' }}
-              data-ad-client="ca-pub-3195662668662265"
-              data-ad-slot="8179055454"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            />
-            <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <AdSenseAd adSlot="8179055454" />
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900">Interfaz Moderna</h4>
-                  <p className="text-gray-600 text-sm">Diseño responsive y fácil de usar</p>
+                  <p className="text-gray-600 text-sm">Optimizada para PC, notebooks y tablets</p>
                 </div>
               </div>
 

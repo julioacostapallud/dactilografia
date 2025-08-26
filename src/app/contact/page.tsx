@@ -166,8 +166,8 @@ export default function ContactPage() {
               </div>
 
               <div className="border-b border-gray-200 pb-4">
-                <h3 className="font-semibold text-gray-900 mb-2">¿Puedo usar DACTILO en mi móvil?</h3>
-                <p className="text-gray-600">Sí, DACTILO es completamente responsive y funciona perfectamente en dispositivos móviles.</p>
+                <h3 className="font-semibold text-gray-900 mb-2">¿En qué dispositivos puedo usar DACTILO?</h3>
+                <p className="text-gray-600">DACTILO está optimizado para computadoras de escritorio, notebooks y tablets. Para obtener la mejor experiencia de práctica de dactilografía, recomendamos usar un teclado físico.</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">

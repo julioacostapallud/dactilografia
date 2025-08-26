@@ -1,16 +1,22 @@
 "use client";
 import { useState, useEffect } from 'react';
+import AdSenseAd from './AdSenseAd';
 
 export default function DeviceCheck({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    
     const checkDevice = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 768;
-      setIsMobile(isMobileDevice);
-      setIsLoading(false);
+      if (typeof window !== 'undefined') {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 768;
+        setIsMobile(isMobileDevice);
+        setIsLoading(false);
+      }
     };
 
     checkDevice();
@@ -18,6 +24,11 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
     
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
+
+  // No renderizar nada hasta que el componente esté montado en el cliente
+  if (!mounted) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -39,17 +50,7 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
             {/* AdSense Ad Unit - Mobile Top */}
-            <ins 
-              className="adsbygoogle"
-              style={{ display: 'block' }}
-              data-ad-client="ca-pub-3195662668662265"
-              data-ad-slot="3645748229"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            />
-            <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <AdSenseAd adSlot="3645748229" />
           </div>
         </div>
 
@@ -140,17 +141,7 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
             <div className="text-lg font-semibold mb-2">Publicidad</div>
             <div className="text-sm">Google Ads</div>
             {/* AdSense Ad Unit - Mobile Bottom */}
-            <ins 
-              className="adsbygoogle"
-              style={{ display: 'block' }}
-              data-ad-client="ca-pub-3195662668662265"
-              data-ad-slot="9338742817"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            />
-            <script>
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <AdSenseAd adSlot="9338742817" />
           </div>
         </div>
       </div>
