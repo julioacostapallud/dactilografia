@@ -6,7 +6,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import OnboardingModal from './components/OnboardingModal';
 
-import { apiService, Prueba, TextoPrueba, Institucion } from '@/lib/api';
+import { apiService, Prueba, Institucion } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { usePageVisit } from '@/lib/hooks/usePageVisit';
 import AdSenseAd from './components/AdSenseAd';

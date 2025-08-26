@@ -16,7 +16,7 @@ interface AdSenseAdProps {
 }
 
 export default function AdSenseAd({ adSlot, adFormat = 'auto', className = '' }: AdSenseAdProps) {
-  const adRef = useRef<HTMLElement>(null);
+  const adRef = useRef<HTMLModElement>(null);
 
   useEffect(() => {
     // Solo ejecutar en el cliente
