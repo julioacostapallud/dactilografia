@@ -34,7 +34,7 @@ export default function Home() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const textContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Función para cargar un texto aleatorio desde la API
+  // Función para cargar un texto aleatorio desde la API (deploy trigger)
   const loadRandomText = async () => {
     if (isLocked) return; // No cambiar texto durante la práctica
     
