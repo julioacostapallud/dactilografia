@@ -6,7 +6,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import OnboardingModal from './components/OnboardingModal';
 
-import { apiService, Ejercicio, Prueba, TextoPrueba, Institucion } from '@/lib/api';
+import { apiService, Prueba, TextoPrueba, Institucion } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { usePageVisit } from '@/lib/hooks/usePageVisit';
 import AdSenseAd from './components/AdSenseAd';
@@ -26,7 +26,6 @@ export default function Home() {
   const [correctWords, setCorrectWords] = useState(0);
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [currentPrueba, setCurrentPrueba] = useState<Prueba | null>(null);
-  const [currentTextoPrueba, setCurrentTextoPrueba] = useState<TextoPrueba | null>(null);
   const [instituciones, setInstituciones] = useState<Institucion[]>([]);
   const [pruebas, setPruebas] = useState<Prueba[]>([]);
   const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
