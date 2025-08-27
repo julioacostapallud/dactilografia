@@ -13,10 +13,6 @@ export default function VisitsTab() {
   const [totalVisits, setTotalVisits] = useState(0);
   const [itemsPerPage] = useState(20);
 
-  useEffect(() => {
-    fetchVisits();
-  }, [currentPage, fetchVisits]);
-
   const fetchVisits = useCallback(async () => {
     try {
       setLoading(true);
@@ -36,6 +32,10 @@ export default function VisitsTab() {
       setLoading(false);
     }
   }, [currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    fetchVisits();
+  }, [fetchVisits]);
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
