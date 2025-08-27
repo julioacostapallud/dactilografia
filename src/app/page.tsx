@@ -5,6 +5,8 @@ import { FaRegClock, FaRandom } from "react-icons/fa";
 import Header from './components/Header';
 import Footer from './components/Footer';
 import OnboardingModal from './components/OnboardingModal';
+import ResultsModal from './components/ResultsModal';
+import MarkedText from './components/MarkedText';
 
 import { apiService, Prueba, Institucion } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -14,7 +16,7 @@ import AdSenseAd from './components/AdSenseAd';
 const DEFAULT_DURATION_SECONDS = 4 * 60; // 4 minutos por defecto
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   usePageVisit('/');
   const [inputText, setInputText] = useState("");
   const [practiceText, setPracticeText] = useState("");
@@ -30,37 +32,57 @@ export default function Home() {
   const [pruebas, setPruebas] = useState<Prueba[]>([]);
   const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [practiceResults, setPracticeResults] = useState({
+    wpm: 0,
+    correctWords: 0,
+    totalWords: 0,
+    accuracy: 0,
+    timeElapsed: 0
+  });
+  const [currentTestInfo, setCurrentTestInfo] = useState<{
+    minutos: number;
+    minimo_palabras: number;
+    nombre: string;
+  } | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const textContainerRef = useRef<HTMLDivElement | null>(null);
+  const demoIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isDemoRunning, setIsDemoRunning] = useState(false);
 
   // Función para cargar un texto aleatorio desde la API (deploy trigger v2)
   const loadRandomText = async () => {
     if (isLocked) return; // No cambiar texto durante la práctica
     
+    console.log('🔄 Cargando texto aleatorio...', { currentPrueba: currentPrueba?.nombre });
     setIsLoadingText(true);
     try {
       if (currentPrueba) {
         // Si hay una prueba seleccionada, cargar texto de esa prueba
+        console.log('📝 Cargando texto para prueba:', currentPrueba.nombre);
         const textoPrueba = await apiService.getTextoPruebaAleatorio(currentPrueba.id);
         if (textoPrueba) {
+          console.log('✅ Texto cargado exitosamente');
           setPracticeText(textoPrueba.texto.trim());
         } else {
-          console.error('No se encontraron textos para esta prueba');
+          console.error('❌ No se encontraron textos para esta prueba');
           setPracticeText("No hay textos disponibles para esta prueba. Selecciona otra práctica.");
         }
       } else {
         // Fallback al sistema anterior
+        console.log('📝 Cargando texto genérico');
         const ejercicio = await apiService.getEjercicioAleatorio();
         if (ejercicio) {
+          console.log('✅ Texto genérico cargado');
           setPracticeText(ejercicio.texto.trim());
         } else {
-          console.error('No se encontraron ejercicios disponibles');
+          console.error('❌ No se encontraron ejercicios disponibles');
           setPracticeText("La práctica hace al maestro. Cada día que practicas, mejoras un poco más.");
         }
       }
     } catch (error) {
-      console.error('Error cargando texto:', error);
+      console.error('❌ Error cargando texto:', error);
       setPracticeText("Error al cargar el texto. Intenta seleccionar otra práctica.");
     } finally {
       setIsLoadingText(false);
@@ -85,6 +107,18 @@ export default function Home() {
   useEffect(() => {
     loadRandomText();
   }, []);
+
+  // Cargar texto cuando se selecciona una prueba
+  useEffect(() => {
+    if (currentPrueba) {
+      console.log('🔄 useEffect: currentPrueba cambió, cargando texto...');
+      loadRandomText();
+    }
+  }, [currentPrueba]);
+
+
+
+
 
   // Mostrar onboarding si el usuario no está autenticado y es su primera visita
   useEffect(() => {
@@ -114,8 +148,56 @@ export default function Home() {
     }, 100); // Espera breve para asegurar el render
   };
 
+  // Función para el demo automático
+  const startDemo = () => {
+    if (!practiceText.trim() || isDemoRunning) return;
+    
+    setIsDemoRunning(true);
+    setIsLocked(true);
+    setIsRunning(true);
+    setInputText("");
+    setTimer(durationSeconds);
+    setWpm(0);
+    setCorrectWords(0);
+    
+    const words = practiceText.trim().split(/\s+/);
+    let currentWordIndex = 0;
+    
+    demoIntervalRef.current = setInterval(() => {
+      if (currentWordIndex >= words.length) {
+        // Demo terminado
+        clearInterval(demoIntervalRef.current!);
+        setIsDemoRunning(false);
+        return;
+      }
+      
+      const currentWord = words[currentWordIndex];
+      setInputText(prev => prev + (prev ? ' ' : '') + currentWord);
+      currentWordIndex++;
+      
+    }, 200); // 200ms entre palabras (simula tipeo rápido)
+  };
+
+  const stopDemo = () => {
+    if (demoIntervalRef.current) {
+      clearInterval(demoIntervalRef.current);
+      demoIntervalRef.current = null;
+    }
+    setIsDemoRunning(false);
+  };
+
+  // Cleanup del demo cuando se cancela o finaliza la práctica
+  const cleanupDemo = () => {
+    if (demoIntervalRef.current) {
+      clearInterval(demoIntervalRef.current);
+      demoIntervalRef.current = null;
+    }
+    setIsDemoRunning(false);
+  };
+
   // Cancelar la práctica
   const cancelPractice = () => {
+    cleanupDemo();
     setIsLocked(false);
     setIsRunning(false);
     setInputText("");
@@ -126,8 +208,36 @@ export default function Home() {
 
   // Finalizar la práctica
   const finishPractice = () => {
+    console.log('🔴 finishPractice llamada');
+    cleanupDemo();
     setIsLocked(false);
     setIsRunning(false);
+    
+    // Calcular resultados finales
+    const totalWords = practiceText.trim().split(/\s+/).length;
+    const accuracy = totalWords > 0 ? Math.round((correctWords / totalWords) * 100) : 0;
+    const timeElapsed = durationSeconds - timer;
+    
+    console.log('📊 Resultados calculados:', {
+      wpm,
+      correctWords,
+      totalWords,
+      accuracy,
+      timeElapsed
+    });
+    
+    // Guardar resultados
+    setPracticeResults({
+      wpm,
+      correctWords,
+      totalWords,
+      accuracy,
+      timeElapsed
+    });
+    
+    // Mostrar modal de resultados
+    console.log('🎯 Mostrando modal de resultados');
+    setShowResults(true);
     
     // Si el usuario no está autenticado, mostrar onboarding después de la práctica
     if (!isAuthenticated && typeof window !== 'undefined') {
@@ -150,137 +260,37 @@ export default function Home() {
     return () => clearTimeout(intervalRef.current!);
   }, [isRunning, timer]);
 
-  // Algoritmo de comparación mejorado para errores de omisión/adición
-  function getWordStates() {
-    const inputWords = inputText.trim().split(/\s+/);
-    const targetWords = practiceText.trim().split(/\s+/);
-    const states: { word: string; status: "correct" | "error" | "pending" | "current" }[] = [];
-    let i = 0, j = 0;
-    while (i < targetWords.length) {
-      const target = targetWords[i];
-      const input = inputWords[j] ?? "";
-      if (!input) {
-        states.push({ word: target, status: "pending" });
-        i++;
-        continue;
-      }
-      if (i === j) {
-        // Palabra actual
-        if (j === inputWords.length - 1 && input !== target) {
-          states.push({ word: target, status: "current" });
-        } else if (input === target) {
-          states.push({ word: target, status: "correct" });
-        } else {
-          states.push({ word: target, status: "error" });
-        }
-        i++;
-        j++;
-      } else if (input === target) {
-        states.push({ word: target, status: "correct" });
-        i++;
-        j++;
-      } else if (targetWords[i + 1] === input) {
-        // Palabra omitida en input
-        states.push({ word: target, status: "error" });
-        i++;
-      } else if (inputWords[j + 1] === target) {
-        // Palabra extra en input
-        j++;
-      } else {
-        // Error general
-        if (j === inputWords.length - 1) {
-          states.push({ word: target, status: "current" });
-        } else {
-          states.push({ word: target, status: "error" });
-        }
-        i++;
-        j++;
-      }
-    }
-    return states;
-  }
+
 
   // Calcular correctas con la nueva lógica
   useEffect(() => {
     if (!isRunning) return;
-    const states = getWordStates();
-    setCorrectWords(states.filter((s) => s.status === "correct").length);
+    
     const inputWords = inputText.trim().split(/\s+/);
+    const targetWords = practiceText.trim().split(/\s+/);
+    let correctCount = 0;
+    
+    for (let i = 0; i < inputWords.length && i < targetWords.length; i++) {
+      if (inputWords[i] === targetWords[i]) {
+        correctCount++;
+      }
+    }
+    
+    setCorrectWords(correctCount);
     const minutes = (durationSeconds - timer) / 60;
     setWpm(minutes > 0 ? Math.round(inputWords.length / minutes) : 0);
   }, [inputText, isRunning, timer, practiceText]);
 
-  // Auto-scroll para seguir el progreso del texto
-  useEffect(() => {
-    if (!isRunning || !textContainerRef.current) return;
-    
-    const states = getWordStates();
-    const currentWordIndex = states.findIndex(s => s.status === "current");
-    
-    if (currentWordIndex === -1) return;
-    
-    const container = textContainerRef.current;
-    const wordElements = container.querySelectorAll('span');
-    
-    if (wordElements[currentWordIndex]) {
-      const currentWordElement = wordElements[currentWordIndex] as HTMLElement;
-      const containerRect = container.getBoundingClientRect();
-      const wordRect = currentWordElement.getBoundingClientRect();
-      
-      // Calcular si la palabra actual está fuera de la vista
-      const isWordAbove = wordRect.top < containerRect.top;
-      const isWordBelow = wordRect.bottom > containerRect.bottom;
-      
-      if (isWordAbove || isWordBelow) {
-        // Scroll suave hacia la palabra actual
-        currentWordElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }
-    }
-  }, [inputText, isRunning, practiceText]);
+
+
+
+
+
 
   // Formatear tiempo mm:ss
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  // Renderizado del texto original con marcas y sin movimiento
-  function RenderMarkedText() {
-    const states = getWordStates();
-    return (
-      <div 
-        ref={textContainerRef}
-        className="w-full h-full p-3 border rounded bg-white text-black overflow-y-auto whitespace-normal text-sm leading-tight select-none"
-      >
-        {states.map((s, i) => (
-          <span
-            key={i}
-            className={
-              `inline-block align-baseline min-w-[1ch] px-[1px] py-0 font-normal text-base leading-relaxed transition-none ` +
-              (s.status === "correct"
-                ? "bg-green-100 text-green-800"
-                : s.status === "error"
-                ? "bg-red-200 text-red-800 underline decoration-red-500"
-                : s.status === "current"
-                ? "bg-blue-200 text-blue-800"
-                : "")
-            }
-            style={{
-              fontFamily: 'inherit',
-              fontSize: '0.875rem',
-              lineHeight: '1.25rem',
-              boxSizing: 'border-box',
-              verticalAlign: 'baseline',
-              margin: 0,
-              whiteSpace: 'pre',
-            }}
-          >
-            {s.word + (i < states.length - 1 ? ' ' : '')}
-          </span>
-        ))}
-      </div>
-    );
-  }
+
 
   // Funciones para el onboarding
   const handleOnboardingRegister = () => {
@@ -295,12 +305,20 @@ export default function Home() {
 
   // Funciones para la selección de práctica
   const handleSelectPractice = (prueba: Prueba) => {
+    console.log('🎯 Prueba seleccionada:', prueba.nombre);
     setCurrentPrueba(prueba);
-          // Limpiar ejercicio anterior
-            // Limpiar texto anterior
+    // Limpiar ejercicio anterior
+    // Limpiar texto anterior
     setPracticeText(""); // Limpiar texto actual
     setDurationSeconds(prueba.minutos * 60); // Actualizar duración
     setTimer(prueba.minutos * 60); // Actualizar timer según la prueba
+    
+    // Guardar información de la prueba para el modal
+    setCurrentTestInfo({
+      minutos: prueba.minutos,
+      minimo_palabras: prueba.minimo_palabras,
+      nombre: prueba.nombre
+    });
   };
 
 
@@ -395,6 +413,15 @@ export default function Home() {
           >
             Iniciar
           </button>
+          {user?.email === 'julioacostapallud@gmail.com' && (
+            <button
+              className="px-3 py-2 bg-green-600 text-white rounded disabled:bg-gray-400 text-sm"
+              onClick={isDemoRunning ? stopDemo : startDemo}
+              disabled={!practiceText.trim() || (isLocked && !isDemoRunning)}
+            >
+              {isDemoRunning ? 'Detener Demo' : 'Demo'}
+            </button>
+          )}
           <button
             className="px-3 py-2 bg-gray-500 text-white rounded disabled:bg-gray-300 text-sm"
             onClick={cancelPractice}
@@ -450,18 +477,51 @@ export default function Home() {
           <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-2">
               <label className="font-semibold">Texto para practicar:</label>
+              {isLocked && (
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>Progreso:</span>
+                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                      style={{ 
+                        width: `${Math.min((correctWords / Math.max(practiceText.trim().split(/\s+/).length, 1)) * 100, 100)}%` 
+                      }}
+                    />
+                  </div>
+                  <span className="font-mono">{correctWords}/{practiceText.trim().split(/\s+/).length}</span>
+                </div>
+              )}
             </div>
             {isLocked ? (
-              <RenderMarkedText />
-            ) : (
-              <textarea
-                className="w-full h-full min-h-[350px] p-3 border rounded resize-none bg-white text-black disabled:bg-gray-200 text-sm leading-tight"
-                value={practiceText}
-                onChange={(e) => setPracticeText(e.target.value)}
-                disabled={true}
-                placeholder={isLoadingText ? "Cargando texto..." : "Usa 'Nuevo Texto' para cambiar el fragmento..."}
-                style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}
+              <MarkedText 
+                text={practiceText}
+                inputText={inputText}
+                isRunning={isRunning}
               />
+            ) : (
+              <div 
+                className="w-full h-full p-3 border rounded bg-white text-black text-sm leading-tight overflow-y-auto select-none"
+                style={{ 
+                  fontSize: '0.875rem', 
+                  lineHeight: '1.25rem'
+                }}
+              >
+                {isLoadingText ? (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+                    Cargando texto...
+                  </div>
+                ) : practiceText ? (
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {practiceText}
+                    {console.log('📏 Longitud del texto:', practiceText.length, 'líneas:', practiceText.split('\n').length)}
+                  </div>
+                ) : (
+                  <span className="text-gray-400 italic">
+                    Usa 'Nuevo Texto' para cambiar el fragmento...
+                  </span>
+                )}
+              </div>
             )}
             <div className="mt-2 text-sm text-gray-600 flex items-center justify-between">
               <span className="font-semibold text-blue-600">Palabras en el texto: <span className="font-mono text-lg">{practiceText.trim() ? practiceText.trim().split(/\s+/).length : 0}</span></span>
@@ -473,7 +533,7 @@ export default function Home() {
             <label className="font-semibold mb-2">Tipea aquí:</label>
             <textarea
               ref={inputRef}
-              className="w-full h-full min-h-[350px] p-3 border rounded resize-none text-sm leading-tight bg-white text-black disabled:bg-gray-100"
+              className="w-full h-full p-3 border rounded resize-none text-sm leading-tight bg-white text-black disabled:bg-gray-100"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onPaste={e => e.preventDefault()}
@@ -499,6 +559,14 @@ export default function Home() {
         </div>
       </div>
       </div>
+      
+      {/* Modal de Resultados */}
+      <ResultsModal
+        isOpen={showResults}
+        onClose={() => setShowResults(false)}
+        results={practiceResults}
+        testInfo={currentTestInfo || undefined}
+      />
       
       <Footer />
     </div>
