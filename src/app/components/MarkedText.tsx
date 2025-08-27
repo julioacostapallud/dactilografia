@@ -23,25 +23,23 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
       const target = targetWords[i];
       const input = inputWords[i];
       
-      if (!input) {
-        // Si no hay input para esta palabra, es la palabra actual
-        if (i === inputWords.length) {
-          states.push({ word: target, status: "current" });
+      if (i < inputWords.length - 1) {
+        // Palabras ya completadas (no la última que se está escribiendo)
+        if (input === target) {
+          states.push({ word: target, status: "correct" });
         } else {
-          states.push({ word: target, status: "pending" });
+          states.push({ word: target, status: "error" });
         }
-      } else if (input === target) {
-        states.push({ word: target, status: "correct" });
+      } else if (i === inputWords.length - 1) {
+        // La última palabra que el usuario está escribiendo o acaba de completar
+        if (input === target) {
+          states.push({ word: target, status: "correct" }); // Si es correcta, se marca como correcta
+        } else {
+          states.push({ word: target, status: "current" }); // Si es incorrecta, se marca como actual (azul)
+        }
       } else {
-        states.push({ word: target, status: "error" });
-      }
-    }
-    
-    // Si hay más input que target, marcar la última palabra como current
-    if (inputWords.length > targetWords.length) {
-      const lastState = states[states.length - 1];
-      if (lastState) {
-        lastState.status = "current";
+        // Palabras pendientes
+        states.push({ word: target, status: "pending" });
       }
     }
     
