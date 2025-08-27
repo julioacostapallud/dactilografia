@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import React from "react";
 import { FaRegClock, FaRandom } from "react-icons/fa";
 import Header from './components/Header';
@@ -47,12 +47,11 @@ export default function Home() {
   } | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const textContainerRef = useRef<HTMLDivElement | null>(null);
   const demoIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isDemoRunning, setIsDemoRunning] = useState(false);
 
   // Función para cargar un texto aleatorio desde la API (deploy trigger v2)
-  const loadRandomText = async () => {
+  const loadRandomText = useCallback(async () => {
     if (isLocked) return; // No cambiar texto durante la práctica
     
     console.log('🔄 Cargando texto aleatorio...', { currentPrueba: currentPrueba?.nombre });
@@ -87,7 +86,7 @@ export default function Home() {
     } finally {
       setIsLoadingText(false);
     }
-  };
+  }, [isLocked, currentPrueba]);
 
   // Cargar instituciones al montar el componente
   useEffect(() => {
@@ -106,7 +105,7 @@ export default function Home() {
   // Cargar texto aleatorio al montar el componente
   useEffect(() => {
     loadRandomText();
-  }, []);
+  }, [loadRandomText]);
 
   // Cargar texto cuando se selecciona una prueba
   useEffect(() => {
@@ -114,7 +113,7 @@ export default function Home() {
       console.log('🔄 useEffect: currentPrueba cambió, cargando texto...');
       loadRandomText();
     }
-  }, [currentPrueba]);
+  }, [currentPrueba, loadRandomText]);
 
 
 
@@ -207,7 +206,7 @@ export default function Home() {
   };
 
   // Finalizar la práctica
-  const finishPractice = () => {
+  const finishPractice = useCallback(() => {
     console.log('🔴 finishPractice llamada');
     cleanupDemo();
     setIsLocked(false);
@@ -248,7 +247,7 @@ export default function Home() {
         }, 1000);
       }
     }
-  };
+  }, [isAuthenticated, wpm, correctWords, timer, durationSeconds, practiceText]);
 
   // Temporizador
   useEffect(() => {
@@ -258,7 +257,7 @@ export default function Home() {
       finishPractice();
     }
     return () => clearTimeout(intervalRef.current!);
-  }, [isRunning, timer]);
+  }, [isRunning, timer, finishPractice]);
 
 
 
@@ -279,7 +278,7 @@ export default function Home() {
     setCorrectWords(correctCount);
     const minutes = (durationSeconds - timer) / 60;
     setWpm(minutes > 0 ? Math.round(inputWords.length / minutes) : 0);
-  }, [inputText, isRunning, timer, practiceText]);
+  }, [inputText, isRunning, timer, practiceText, durationSeconds]);
 
 
 
@@ -514,11 +513,10 @@ export default function Home() {
                 ) : practiceText ? (
                   <div style={{ whiteSpace: 'pre-wrap' }}>
                     {practiceText}
-                    {console.log('📏 Longitud del texto:', practiceText.length, 'líneas:', practiceText.split('\n').length)}
                   </div>
                 ) : (
                   <span className="text-gray-400 italic">
-                    Usa 'Nuevo Texto' para cambiar el fragmento...
+                    Usa &apos;Nuevo Texto&apos; para cambiar el fragmento...
                   </span>
                 )}
               </div>

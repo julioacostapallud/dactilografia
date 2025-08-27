@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService, PageVisit } from '@/lib/api';
 import { FaEye, FaDesktop, FaMobile, FaTablet, FaGlobe, FaClock, FaUser } from 'react-icons/fa';
 
@@ -15,9 +15,9 @@ export default function VisitsTab() {
 
   useEffect(() => {
     fetchVisits();
-  }, [currentPage]);
+  }, [currentPage, fetchVisits]);
 
-  const fetchVisits = async () => {
+  const fetchVisits = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiService.getVisits(currentPage, itemsPerPage);
@@ -35,7 +35,7 @@ export default function VisitsTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage]);
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';

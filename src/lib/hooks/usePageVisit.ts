@@ -99,7 +99,8 @@ export const usePageVisit = (pageUrl: string) => {
       
       // Actualizar tiempo al desmontar el componente
       if (visitIdRef.current) {
-        const timeOnPage = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const startTime = startTimeRef.current;
+        const timeOnPage = Math.floor((Date.now() - startTime) / 1000);
         
         fetch(`${apiService.getBaseUrl()}/api/visits`, {
           method: 'PUT',

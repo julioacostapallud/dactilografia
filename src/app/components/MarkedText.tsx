@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 interface MarkedTextProps {
   text: string;
@@ -69,7 +69,7 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [text, inputText, isRunning]);
+  }, [text, inputText, isRunning, getWordStates]);
 
   // Guardar posición del scroll cuando cambie
   useEffect(() => {
@@ -85,12 +85,10 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
   }, []);
 
   // Función para calcular el estado de las palabras
-  const getWordStates = () => {
+  const getWordStates = useCallback(() => {
     const inputWords = inputText.trim().split(/\s+/);
     const targetWords = text.trim().split(/\s+/);
     const states: { word: string; status: "correct" | "error" | "pending" | "current" }[] = [];
-    
-    console.log('🔍 getWordStates:', { inputWords: inputWords.length, targetWords: targetWords.length });
     
     for (let i = 0; i < targetWords.length; i++) {
       const target = targetWords[i];
@@ -118,9 +116,8 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
       }
     }
     
-    console.log('📊 Estados calculados:', states.filter(s => s.status === "current").length, 'palabras current');
     return states;
-  };
+  }, [inputText, text]);
 
   const states = getWordStates();
 
