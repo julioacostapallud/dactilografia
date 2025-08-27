@@ -88,10 +88,29 @@ export default function Home() {
     }
   }, [isLocked, currentPrueba]);
 
+  // Funciones para cargar instituciones y pruebas
+  const loadInstituciones = useCallback(async () => {
+    try {
+      const data = await apiService.getInstituciones();
+      setInstituciones(data);
+    } catch (error) {
+      console.error('Error cargando instituciones:', error);
+    }
+  }, []);
+
+  const loadPruebas = useCallback(async (institucionId: number) => {
+    try {
+      const data = await apiService.getPruebas(institucionId);
+      setPruebas(data);
+    } catch (error) {
+      console.error('Error cargando pruebas:', error);
+    }
+  }, []);
+
   // Cargar instituciones al montar el componente
   useEffect(() => {
     loadInstituciones();
-  }, []);
+  }, [loadInstituciones]);
 
   // Cargar pruebas cuando se selecciona una institución
   useEffect(() => {
@@ -100,7 +119,7 @@ export default function Home() {
     } else {
       setPruebas([]);
     }
-  }, [selectedInstitucionId]);
+  }, [selectedInstitucionId, loadPruebas]);
 
   // Cargar texto aleatorio al montar el componente
   useEffect(() => {
@@ -322,24 +341,7 @@ export default function Home() {
 
 
 
-  // Funciones para cargar instituciones y pruebas
-  const loadInstituciones = async () => {
-    try {
-      const data = await apiService.getInstituciones();
-      setInstituciones(data);
-    } catch (error) {
-      console.error('Error cargando instituciones:', error);
-    }
-  };
 
-  const loadPruebas = async (institucionId: number) => {
-    try {
-      const data = await apiService.getPruebas(institucionId);
-      setPruebas(data);
-    } catch (error) {
-      console.error('Error cargando pruebas:', error);
-    }
-  };
 
   const handleInstitucionChange = (institucionId: number) => {
     setSelectedInstitucionId(institucionId);

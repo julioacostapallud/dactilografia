@@ -13,6 +13,41 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
   const lastScrollTop = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Función para calcular el estado de las palabras
+  const getWordStates = useCallback(() => {
+    const inputWords = inputText.trim().split(/\s+/);
+    const targetWords = text.trim().split(/\s+/);
+    const states: { word: string; status: "correct" | "error" | "pending" | "current" }[] = [];
+    
+    for (let i = 0; i < targetWords.length; i++) {
+      const target = targetWords[i];
+      const input = inputWords[i];
+      
+      if (!input) {
+        // Si no hay input para esta palabra, es la palabra actual
+        if (i === inputWords.length) {
+          states.push({ word: target, status: "current" });
+        } else {
+          states.push({ word: target, status: "pending" });
+        }
+      } else if (input === target) {
+        states.push({ word: target, status: "correct" });
+      } else {
+        states.push({ word: target, status: "error" });
+      }
+    }
+    
+    // Si hay más input que target, marcar la última palabra como current
+    if (inputWords.length > targetWords.length) {
+      const lastState = states[states.length - 1];
+      if (lastState) {
+        lastState.status = "current";
+      }
+    }
+    
+    return states;
+  }, [inputText, text]);
+
   // Preservar posición del scroll y auto-scroll inteligente
   useEffect(() => {
     if (containerRef.current && lastScrollTop.current > 0) {
@@ -83,41 +118,6 @@ export default function MarkedText({ text, inputText, isRunning }: MarkedTextPro
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Función para calcular el estado de las palabras
-  const getWordStates = useCallback(() => {
-    const inputWords = inputText.trim().split(/\s+/);
-    const targetWords = text.trim().split(/\s+/);
-    const states: { word: string; status: "correct" | "error" | "pending" | "current" }[] = [];
-    
-    for (let i = 0; i < targetWords.length; i++) {
-      const target = targetWords[i];
-      const input = inputWords[i];
-      
-      if (!input) {
-        // Si no hay input para esta palabra, es la palabra actual
-        if (i === inputWords.length) {
-          states.push({ word: target, status: "current" });
-        } else {
-          states.push({ word: target, status: "pending" });
-        }
-      } else if (input === target) {
-        states.push({ word: target, status: "correct" });
-      } else {
-        states.push({ word: target, status: "error" });
-      }
-    }
-    
-    // Si hay más input que target, marcar la última palabra como current
-    if (inputWords.length > targetWords.length) {
-      const lastState = states[states.length - 1];
-      if (lastState) {
-        lastState.status = "current";
-      }
-    }
-    
-    return states;
-  }, [inputText, text]);
 
   const states = getWordStates();
 

@@ -47,7 +47,8 @@ export const usePageVisit = (pageUrl: string) => {
     // Función para actualizar el tiempo de visita al salir
     const handleBeforeUnload = async () => {
       if (visitIdRef.current) {
-        const timeOnPage = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const startTime = startTimeRef.current;
+        const timeOnPage = Math.floor((Date.now() - startTime) / 1000);
         
         try {
           await fetch(`${apiService.getBaseUrl()}/api/visits`, {
@@ -69,7 +70,8 @@ export const usePageVisit = (pageUrl: string) => {
     // Función para actualizar el tiempo de visita al cambiar de página
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'hidden' && visitIdRef.current) {
-        const timeOnPage = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const startTime = startTimeRef.current;
+        const timeOnPage = Math.floor((Date.now() - startTime) / 1000);
         
         try {
           await fetch(`${apiService.getBaseUrl()}/api/visits`, {
