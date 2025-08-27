@@ -28,6 +28,45 @@ export default function ResultsModal({ isOpen, onClose, results, testInfo }: Res
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Función para calcular el color de la barra de progreso
+  const getProgressBarColor = () => {
+    if (!testInfo) return 'bg-gradient-to-r from-gray-400 to-gray-500';
+    
+    const progressPercentage = (results.correctWords / testInfo.minimo_palabras) * 100;
+    
+    if (progressPercentage <= 100) {
+      // De 0% a 100%: Rojo → Amarillo (progresivo)
+      if (progressPercentage <= 25) {
+        // De 0% a 25%: Rojo intenso
+        return 'bg-gradient-to-r from-red-600 to-red-500';
+      } else if (progressPercentage <= 50) {
+        // De 25% a 50%: Rojo → Naranja
+        return 'bg-gradient-to-r from-red-500 to-orange-500';
+      } else if (progressPercentage <= 75) {
+        // De 50% a 75%: Naranja → Amarillo claro
+        return 'bg-gradient-to-r from-orange-500 to-yellow-500';
+      } else {
+        // De 75% a 100%: Amarillo claro → Amarillo brillante
+        return 'bg-gradient-to-r from-yellow-500 to-yellow-400';
+      }
+    } else {
+      // Más del 100%: Verde cada vez más brillante
+      if (progressPercentage <= 125) {
+        // De 100% a 125%: Verde claro
+        return 'bg-gradient-to-r from-green-400 to-green-500';
+      } else if (progressPercentage <= 150) {
+        // De 125% a 150%: Verde medio
+        return 'bg-gradient-to-r from-green-500 to-green-600';
+      } else if (progressPercentage <= 200) {
+        // De 150% a 200%: Verde brillante
+        return 'bg-gradient-to-r from-green-600 to-green-700';
+      } else {
+        // Más del 200%: Verde muy brillante
+        return 'bg-gradient-to-r from-green-700 to-green-800';
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay sutil con blur */}
@@ -136,11 +175,7 @@ export default function ResultsModal({ isOpen, onClose, results, testInfo }: Res
               <div className="relative h-6 bg-indigo-100 rounded-full overflow-hidden">
                 {/* Barra de progreso del usuario */}
                 <div 
-                  className={`h-full transition-all duration-1000 ease-out ${
-                    results.correctWords >= testInfo.minimo_palabras 
-                      ? 'bg-gradient-to-r from-green-400 to-green-600' 
-                      : 'bg-gradient-to-r from-orange-400 to-red-500'
-                  }`}
+                  className={`h-full transition-all duration-1000 ease-out ${getProgressBarColor()}`}
                   style={{ 
                     width: `${Math.min((results.correctWords / testInfo.minimo_palabras) * 100, 100)}%` 
                   }}
@@ -159,7 +194,11 @@ export default function ResultsModal({ isOpen, onClose, results, testInfo }: Res
               {results.correctWords >= testInfo.minimo_palabras ? (
                 <div className="flex items-center justify-center text-green-700">
                   <FaTrophy className="mr-2" />
-                  <span className="font-semibold">¡Aprobado! Has superado el objetivo</span>
+                  <span className="font-semibold">
+                    {results.correctWords >= testInfo.minimo_palabras * 1.5 
+                      ? '¡Excelente! Has superado ampliamente el objetivo' 
+                      : '¡Aprobado! Has superado el objetivo'}
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center text-orange-700">
