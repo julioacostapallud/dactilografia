@@ -79,7 +79,7 @@ export default function VisitsCharts() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
     );
   }
@@ -111,8 +111,8 @@ export default function VisitsCharts() {
       datasets: [{
         label: 'Visitas',
         data: sortedDates.map(date => visitsByDate[date]),
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
         fill: true,
         tension: 0.4,
       }]
@@ -127,11 +127,11 @@ export default function VisitsCharts() {
     }, {} as Record<string, number>);
 
     const colors = [
+      'rgba(34, 197, 94, 0.8)',    // Green
+      'rgba(249, 115, 22, 0.8)',   // Orange
+      'rgba(107, 114, 128, 0.8)',  // Gray
       'rgba(59, 130, 246, 0.8)',   // Blue
-      'rgba(16, 185, 129, 0.8)',   // Green
-      'rgba(245, 158, 11, 0.8)',   // Yellow
-      'rgba(239, 68, 68, 0.8)',    // Red
-      'rgba(139, 92, 246, 0.8)',   // Purple
+      'rgba(168, 85, 247, 0.8)',   // Purple
     ];
 
     return {
@@ -158,14 +158,14 @@ export default function VisitsCharts() {
         label: 'Dispositivos',
         data: Object.values(deviceCounts),
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(249, 115, 22, 0.8)',
+          'rgba(107, 114, 128, 0.8)',
         ],
         borderColor: [
-          'rgb(59, 130, 246)',
-          'rgb(16, 185, 129)',
-          'rgb(245, 158, 11)',
+          'rgb(34, 197, 94)',
+          'rgb(249, 115, 22)',
+          'rgb(107, 114, 128)',
         ],
         borderWidth: 1,
       }]
@@ -189,8 +189,8 @@ export default function VisitsCharts() {
       datasets: [{
         label: 'Visitas por Página',
         data: sortedPages.map(([,count]) => count),
-        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+        borderColor: 'rgb(34, 197, 94)',
         borderWidth: 1,
       }]
     };
@@ -207,43 +207,43 @@ export default function VisitsCharts() {
     <div className="space-y-8">
       {/* Métricas principales */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg">
+        <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm">Total Visitas</p>
+              <p className="text-green-100 text-sm">Total Visitas</p>
               <p className="text-3xl font-bold">{chartData.totalVisits}</p>
             </div>
-            <div className="text-blue-200 text-4xl">📊</div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm">Usuarios Únicos</p>
-              <p className="text-3xl font-bold">{chartData.uniqueUsers}</p>
-            </div>
-            <div className="text-green-200 text-4xl">👥</div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm">Páginas Únicas</p>
-              <p className="text-3xl font-bold">{chartData.uniquePages}</p>
-            </div>
-            <div className="text-purple-200 text-4xl">🌐</div>
+            <div className="text-green-200 text-4xl">📊</div>
           </div>
         </div>
         
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm">Tiempo Promedio</p>
+              <p className="text-orange-100 text-sm">Usuarios Únicos</p>
+              <p className="text-3xl font-bold">{chartData.uniqueUsers}</p>
+            </div>
+            <div className="text-orange-200 text-4xl">👥</div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-6 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-100 text-sm">Páginas Únicas</p>
+              <p className="text-3xl font-bold">{chartData.uniquePages}</p>
+            </div>
+            <div className="text-gray-200 text-4xl">🌐</div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-green-600 to-green-500 text-white p-6 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm">Tiempo Promedio</p>
               <p className="text-3xl font-bold">{formatTime(chartData.averageTime)}</p>
             </div>
-            <div className="text-orange-200 text-4xl">⏱️</div>
+            <div className="text-green-200 text-4xl">⏱️</div>
           </div>
         </div>
       </div>

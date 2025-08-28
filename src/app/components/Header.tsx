@@ -15,22 +15,22 @@ export default function Header() {
   const isAdmin = user?.email === 'julioacostapallud@gmail.com';
 
   return (
-    <header className="bg-gradient-to-r from-green-700 via-green-500 via-orange-500 to-orange-600 shadow-md px-6 py-4">
+    <header className="bg-gradient-to-r from-green-700 via-green-500 via-orange-500 to-orange-600 shadow-md px-6 py-3">
       <div className="flex justify-between items-center w-full">
         <div className="flex items-center space-x-8">
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-white">Dactilo</h1>
+          <Link href="/" className="flex items-center space-x-3 cursor-pointer hover:scale-105 transition-transform">
             {/* Logo: Teclado + Velocidad */}
-            <svg width="40" height="20" viewBox="0 0 40 20" className="cursor-pointer hover:scale-110 transition-transform">
-              <rect x="0" y="0" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
-              <rect x="9" y="0" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
-              <rect x="18" y="0" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
-              <rect x="27" y="0" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
-              <path d="M0 8 L35 8" stroke="white" strokeWidth="1" opacity="0.6"/>
-              <path d="M0 10 L30 10" stroke="white" strokeWidth="1" opacity="0.4"/>
-              <path d="M0 12 L25 12" stroke="white" strokeWidth="1" opacity="0.2"/>
+            <svg width="40" height="20" viewBox="0 0 40 20" className="flex-shrink-0" style={{ marginTop: '7px' }}>
+              <rect x="0" y="2" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
+              <rect x="9" y="2" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
+              <rect x="18" y="2" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
+              <rect x="27" y="2" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
+              <path d="M0 10 L35 10" stroke="white" strokeWidth="1" opacity="0.6"/>
+              <path d="M0 12 L30 12" stroke="white" strokeWidth="1" opacity="0.4"/>
+              <path d="M0 14 L25 14" stroke="white" strokeWidth="1" opacity="0.2"/>
             </svg>
-          </div>
+            <h1 className="text-2xl font-bold text-white">Dactilo</h1>
+          </Link>
           
           {/* Navegación */}
           <nav className="hidden md:flex space-x-6">

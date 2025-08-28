@@ -34,6 +34,8 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
       onClose();
     }
   }, [status, session, onClose]);
+
+
   
   if (!isOpen) return null;
 
@@ -109,25 +111,51 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {mode === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+                      <div className="relative bg-white rounded-2xl shadow-2xl border-2 border-gray-200 w-full max-w-md animate-in slide-in-from-bottom-4 duration-300">
+          {/* Header integrado */}
+          <div className="flex justify-between items-center w-full bg-gradient-to-r from-green-600 via-green-500 to-orange-500 rounded-t-2xl p-1">
+          {/* Logo + Dactilo */}
+          <div className="flex items-center space-x-1">
+            <svg width="30" height="15" viewBox="0 0 40 20" className="flex-shrink-0" style={{ marginTop: '6px' }}>
+              <rect x="0" y="2" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
+              <rect x="9" y="2" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
+              <rect x="18" y="2" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
+              <rect x="27" y="2" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
+              <path d="M0 10 L35 10" stroke="white" strokeWidth="1" opacity="0.6"/>
+              <path d="M0 12 L30 12" stroke="white" strokeWidth="1" opacity="0.4"/>
+              <path d="M0 14 L25 14" stroke="white" strokeWidth="1" opacity="0.2"/>
+            </svg>
+            <h2 className="text-sm font-bold text-white">Dactilo</h2>
+            <span className="text-white/70 text-sm">•</span>
+            <span className="text-sm font-semibold text-orange-200">
+              {mode === 'login' ? 'Iniciar Sesión' : 'Registrarse'}
+            </span>
+          </div>
+          
+          {/* Close button */}
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-1 rounded-full hover:bg-white/20 transition-colors duration-200"
+            aria-label="Cerrar modal"
           >
-            <FaTimes className="w-5 h-5" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-white hover:text-orange-300 transition-colors">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
         </div>
+
+        <div className="p-6">
 
         {/* Google Sign In */}
         <button
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors mb-6"
+          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 hover:border-orange-300 transition-all duration-200 mb-6 shadow-sm"
         >
           <FcGoogle className="w-5 h-5" />
           <span>Continuar con Google</span>
@@ -155,7 +183,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required={mode === 'register'}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                 placeholder="Tu nombre completo"
               />
             </div>
@@ -171,7 +199,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
               placeholder="tu@email.com"
             />
           </div>
@@ -187,7 +215,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 pr-10 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                 placeholder="••••••••"
               />
               <button
@@ -213,7 +241,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 px-4 rounded-lg hover:from-green-500 hover:to-green-400 transition-all duration-200 disabled:from-green-300 disabled:to-green-400 disabled:opacity-50 font-bold shadow-md disabled:shadow-none"
           >
             {isLoading ? 'Cargando...' : (mode === 'login' ? 'Iniciar Sesión' : 'Registrarse')}
           </button>
@@ -223,6 +251,7 @@ export default function AuthModal({ isOpen, onClose, mode }: AuthModalProps) {
           <p>
             {mode === 'login' ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
           </p>
+        </div>
         </div>
       </div>
     </div>

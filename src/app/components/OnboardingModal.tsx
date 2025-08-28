@@ -36,18 +36,45 @@ export default function OnboardingModal({ isOpen, onClose, onRegister }: Onboard
   if (!isOpen || hasSeenOnboarding || !isClient) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-        {/* Botón cerrar */}
-        <button
-          onClick={handleSkip}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
-          <FaTimes size={20} />
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleSkip}
+      />
+              <div className="relative bg-white rounded-2xl shadow-2xl border-2 border-gray-200 max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
+        {/* Header integrado */}
+        <div className="flex justify-between items-center w-full bg-gradient-to-r from-green-600 via-green-500 to-orange-500 rounded-t-2xl p-1">
+          {/* Logo + Dactilo */}
+          <div className="flex items-center space-x-1">
+            <svg width="30" height="15" viewBox="0 0 40 20" className="flex-shrink-0" style={{ marginTop: '6px' }}>
+              <rect x="0" y="2" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
+              <rect x="9" y="2" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
+              <rect x="18" y="2" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
+              <rect x="27" y="2" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
+              <path d="M0 10 L35 10" stroke="white" strokeWidth="1" opacity="0.6"/>
+              <path d="M0 12 L30 12" stroke="white" strokeWidth="1" opacity="0.4"/>
+              <path d="M0 14 L25 14" stroke="white" strokeWidth="1" opacity="0.2"/>
+            </svg>
+            <h2 className="text-sm font-bold text-white">Dactilo</h2>
+            <span className="text-white/70 text-sm">•</span>
+            <span className="text-sm font-semibold text-orange-200">¡Bienvenido!</span>
+          </div>
+          
+          {/* Close button */}
+          <button
+            onClick={handleSkip}
+            className="p-1 rounded-full hover:bg-white/20 transition-colors duration-200"
+            aria-label="Cerrar modal"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-white hover:text-orange-300 transition-colors">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
 
-        {/* Contenido */}
-        <div className="text-center">
+        <div className="p-6">
+          {/* Contenido */}
+          <div className="text-center">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               ¡Mejora tu experiencia!
@@ -109,6 +136,7 @@ export default function OnboardingModal({ isOpen, onClose, onRegister }: Onboard
           <p className="text-xs text-gray-500 mt-4">
             Puedes registrarte en cualquier momento desde el menú
           </p>
+        </div>
         </div>
       </div>
     </div>

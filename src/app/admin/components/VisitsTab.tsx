@@ -97,7 +97,7 @@ export default function VisitsTab() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
         <span className="ml-2 text-gray-600">Cargando visitas...</span>
       </div>
     );
@@ -110,7 +110,7 @@ export default function VisitsTab() {
         <p className="text-red-600">{error}</p>
         <button 
           onClick={fetchVisits}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 transition-all duration-200 shadow-md font-bold"
         >
           Reintentar
         </button>
@@ -124,43 +124,43 @@ export default function VisitsTab() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Visitas</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <div className="flex items-center">
-              <FaEye className="w-5 h-5 text-blue-600 mr-2" />
+              <FaEye className="w-5 h-5 text-green-600 mr-2" />
               <div>
                 <p className="text-sm text-gray-600">Total Visitas</p>
-                <p className="text-2xl font-bold text-blue-600">{totalVisits.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-green-600">{totalVisits.toLocaleString()}</p>
               </div>
             </div>
           </div>
-                     <div className="bg-green-50 p-4 rounded-lg">
+                     <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
              <div className="flex items-center">
-               <FaUser className="w-5 h-5 text-green-600 mr-2" />
+               <FaUser className="w-5 h-5 text-orange-600 mr-2" />
                <div>
                  <p className="text-sm text-gray-600">Usuarios Únicos</p>
-                 <p className="text-2xl font-bold text-green-600">
+                 <p className="text-2xl font-bold text-orange-600">
                    {visits.filter(v => v.userId).length}
                  </p>
                </div>
              </div>
            </div>
-                     <div className="bg-purple-50 p-4 rounded-lg">
+                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
              <div className="flex items-center">
-               <FaGlobe className="w-5 h-5 text-purple-600 mr-2" />
+               <FaGlobe className="w-5 h-5 text-gray-600 mr-2" />
                <div>
                  <p className="text-sm text-gray-600">Páginas Únicas</p>
-                 <p className="text-2xl font-bold text-purple-600">
+                 <p className="text-2xl font-bold text-gray-600">
                    {new Set(visits.map(v => v.pageUrl)).size}
                  </p>
                </div>
              </div>
            </div>
-                     <div className="bg-orange-50 p-4 rounded-lg">
+                     <div className="bg-green-50 p-4 rounded-lg border border-green-200">
              <div className="flex items-center">
-               <FaClock className="w-5 h-5 text-orange-600 mr-2" />
+               <FaClock className="w-5 h-5 text-green-600 mr-2" />
                <div>
                  <p className="text-sm text-gray-600">Tiempo Promedio</p>
-                 <p className="text-2xl font-bold text-orange-600">
+                 <p className="text-2xl font-bold text-green-600">
                    {(() => {
                      const visitsWithTime = visits.filter(v => v.timeOnPageSeconds);
                      if (visitsWithTime.length === 0) return 'N/A';
@@ -302,7 +302,7 @@ export default function VisitsTab() {
                         onClick={() => setCurrentPage(page)}
                         className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           currentPage === page
-                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                            ? 'z-10 bg-green-50 border-green-500 text-green-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                         }`}
                       >

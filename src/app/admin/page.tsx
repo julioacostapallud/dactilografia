@@ -31,7 +31,7 @@ export default function AdminPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-                        <div className="flex-1 bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30">
+                        <div className="flex-1 bg-gradient-to-br from-green-50/50 via-green-100/30 to-orange-100/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header del panel */}
           <div className="mb-8">

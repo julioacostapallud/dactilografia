@@ -1,206 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { apiService, Institucion, Prueba } from '@/lib/api';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { FaTimes, FaList, FaCog } from 'react-icons/fa';
+import { apiService, Prueba, Institucion } from '@/lib/api';
 
 interface PracticeTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPractice: (prueba: Prueba) => void;
+  onCustomPractice: (config: {
+    texto: string;
+    objetivoPalabras: number;
+    minutos: number;
+  }) => void;
 }
 
-const PracticeTypeModal: React.FC<PracticeTypeModalProps> = ({
-  isOpen,
-  onClose,
-  onSelectPractice
-}) => {
+export default function PracticeTypeModal({ 
+  isOpen, 
+  onClose, 
+  onSelectPractice, 
+  onCustomPractice 
+}: PracticeTypeModalProps) {
+  const [activeTab, setActiveTab] = useState<'select' | 'custom'>('select');
   const [instituciones, setInstituciones] = useState<Institucion[]>([]);
   const [pruebas, setPruebas] = useState<Prueba[]>([]);
-  const [selectedInstitucion, setSelectedInstitucion] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
+  const [selectedPruebaId, setSelectedPruebaId] = useState<number | null>(null);
+  
+  // Campos para práctica personalizada
+  const [customText, setCustomText] = useState('');
+  const [customObjetivoPalabras, setCustomObjetivoPalabras] = useState(30);
+  const [customMinutos, setCustomMinutos] = useState(1);
 
-  // Cargar instituciones al abrir el modal
+  // Cargar instituciones al montar el componente
   useEffect(() => {
-    if (isOpen) {
-      loadInstituciones();
-    }
-  }, [isOpen]);
+    loadInstituciones();
+  }, []);
 
   // Cargar pruebas cuando se selecciona una institución
   useEffect(() => {
-    if (selectedInstitucion) {
-      loadPruebas(selectedInstitucion);
+    if (selectedInstitucionId) {
+      loadPruebas(selectedInstitucionId);
     } else {
       setPruebas([]);
     }
-  }, [selectedInstitucion]);
+  }, [selectedInstitucionId]);
+
+
 
   const loadInstituciones = async () => {
-    setIsLoading(true);
-    setError(null);
-    console.log('🔍 Iniciando carga de instituciones...');
-    console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
-    
     try {
-      console.log('📡 Haciendo request a:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/instituciones`);
       const data = await apiService.getInstituciones();
-      console.log('✅ Instituciones cargadas:', data);
       setInstituciones(data);
-    } catch (err) {
-      console.error('❌ Error loading instituciones:', err);
-      console.error('❌ Error details:', {
-        message: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : undefined
-      });
-      setError('Error al cargar las instituciones');
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error cargando instituciones:', error);
     }
   };
 
   const loadPruebas = async (institucionId: number) => {
-    setIsLoading(true);
-    setError(null);
     try {
       const data = await apiService.getPruebas(institucionId);
       setPruebas(data);
-    } catch (err) {
-      setError('Error al cargar las pruebas');
-      console.error('Error loading pruebas:', err);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Error cargando pruebas:', error);
     }
   };
 
   const handleInstitucionChange = (institucionId: number) => {
-    setSelectedInstitucion(institucionId);
+    setSelectedInstitucionId(institucionId);
+    setSelectedPruebaId(null);
   };
 
-  const handlePruebaSelect = (prueba: Prueba) => {
-    onSelectPractice(prueba);
-    onClose();
+  const handlePruebaChange = (pruebaId: number) => {
+    setSelectedPruebaId(pruebaId);
+  };
+
+  const handleSelectPractice = () => {
+    if (selectedPruebaId) {
+      const prueba = pruebas.find(p => p.id === selectedPruebaId);
+      if (prueba) {
+        onSelectPractice(prueba);
+        onClose();
+      }
+    }
+  };
+
+  const handleCustomPractice = () => {
+    if (customText.trim() && customObjetivoPalabras > 0 && customMinutos > 0) {
+      onCustomPractice({
+        texto: customText.trim(),
+        objetivoPalabras: customObjetivoPalabras,
+        minutos: customMinutos
+      });
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-blue-600 text-white px-6 py-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Seleccionar Tipo de Práctica</h2>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 text-2xl font-bold"
-            >
-              ×
-            </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      <div className="relative bg-white rounded-2xl shadow-2xl border-2 border-gray-200 max-w-2xl w-full animate-in slide-in-from-bottom-4 duration-300" style={{ maxWidth: '600px' }}>
+        {/* Header integrado */}
+        <div className="flex justify-between items-center w-full bg-gradient-to-r from-green-600 via-green-500 to-orange-500 rounded-t-2xl p-1">
+          {/* Logo + Dactilo */}
+          <div className="flex items-center space-x-1">
+            <svg width="30" height="15" viewBox="0 0 40 20" className="flex-shrink-0" style={{ marginTop: '6px' }}>
+              <rect x="0" y="2" width="8" height="6" rx="1" fill="white" opacity="0.9"/>
+              <rect x="9" y="2" width="8" height="6" rx="1" fill="white" opacity="0.7"/>
+              <rect x="18" y="2" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
+              <rect x="27" y="2" width="8" height="6" rx="1" fill="white" opacity="0.3"/>
+              <path d="M0 10 L35 10" stroke="white" strokeWidth="1" opacity="0.6"/>
+              <path d="M0 12 L30 12" stroke="white" strokeWidth="1" opacity="0.4"/>
+              <path d="M0 14 L25 14" stroke="white" strokeWidth="1" opacity="0.2"/>
+            </svg>
+            <h2 className="text-sm font-bold text-white">Dactilo</h2>
+            <span className="text-white/70 text-sm">•</span>
+            <span className="text-sm font-semibold text-orange-200">Tipo de Práctica</span>
           </div>
+          
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-white/20 transition-colors duration-200"
+            aria-label="Cerrar modal"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-white hover:text-orange-300 transition-colors">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-
-          {/* Institución Selection */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">
-              Selecciona una Institución:
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {instituciones.map((institucion) => (
-                <button
-                  key={institucion.id}
-                  onClick={() => handleInstitucionChange(institucion.id)}
-                  className={`p-4 border rounded-lg text-left transition-colors ${
-                    selectedInstitucion === institucion.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-medium">{institucion.nombre}</div>
-                  <div className="text-sm text-gray-600">{institucion.provincia}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Pruebas Selection */}
-          {selectedInstitucion && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                Selecciona una Prueba:
-              </h3>
-              {isLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Cargando pruebas...</p>
-                </div>
-              ) : pruebas.length > 0 ? (
-                <div className="space-y-3">
-                  {pruebas.map((prueba) => (
-                    <button
-                      key={prueba.id}
-                      onClick={() => handlePruebaSelect(prueba)}
-                      className="w-full p-4 border border-gray-200 rounded-lg text-left hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">{prueba.nombre}</div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            {prueba.institucion_nombre} - {prueba.provincia}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-blue-600">
-                            {prueba.minutos} min
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {prueba.minimo_palabras} palabras mín.
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No hay pruebas disponibles para esta institución.
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-800 mb-2">¿Cómo funciona?</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Selecciona la institución donde quieres practicar</li>
-              <li>• Elige el tipo de prueba específico</li>
-              <li>• Cada prueba tiene su tiempo límite y palabras mínimas</li>
-              <li>• Los textos están adaptados al formato de cada institución</li>
-            </ul>
-          </div>
+        <div className="p-6">
+          {/* Tabs */}
+        <div className="flex mb-6 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('select')}
+            className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors ${
+              activeTab === 'select'
+                ? 'text-green-600 border-b-2 border-green-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <FaList size={16} />
+            Seleccionar Prueba
+          </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors ${
+              activeTab === 'custom'
+                ? 'text-green-600 border-b-2 border-green-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <FaCog size={16} />
+            Práctica Personalizada
+          </button>
         </div>
 
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 border-t">
-          <div className="flex justify-end">
+        {/* Tab Content */}
+        {activeTab === 'select' ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Institución
+              </label>
+              <select
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                value={selectedInstitucionId || ''}
+                onChange={(e) => handleInstitucionChange(Number(e.target.value))}
+              >
+                <option value="">Selecciona una institución</option>
+                {instituciones.map((institucion) => (
+                  <option key={institucion.id} value={institucion.id}>
+                    {institucion.nombre} - {institucion.provincia}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prueba
+              </label>
+              <select
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                value={selectedPruebaId || ''}
+                onChange={(e) => handlePruebaChange(Number(e.target.value))}
+                disabled={!selectedInstitucionId}
+              >
+                <option value="">Selecciona una prueba</option>
+                {pruebas.map((prueba) => (
+                  <option key={prueba.id} value={prueba.id}>
+                    {prueba.nombre} ({prueba.minutos}min - {prueba.minimo_palabras} palabras)
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              onClick={handleSelectPractice}
+              disabled={!selectedPruebaId}
+              className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 px-4 rounded-lg font-bold hover:from-green-500 hover:to-green-400 disabled:from-green-300 disabled:to-green-400 disabled:opacity-50 transition-all duration-200 shadow-md disabled:shadow-none"
             >
-              Cancelar
+              Seleccionar Prueba
             </button>
           </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Texto para practicar
+              </label>
+              <textarea
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                placeholder="Escribe o pega el texto que quieres practicar..."
+                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 resize-none"
+                rows={6}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Objetivo de palabras
+                </label>
+                <input
+                  type="number"
+                  value={customObjetivoPalabras}
+                  onChange={(e) => setCustomObjetivoPalabras(Number(e.target.value))}
+                  min="1"
+                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiempo (minutos)
+                </label>
+                <input
+                  type="number"
+                  value={customMinutos}
+                  onChange={(e) => setCustomMinutos(Number(e.target.value))}
+                  min="1"
+                  max="60"
+                  className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handleCustomPractice}
+              disabled={!customText.trim() || customObjetivoPalabras <= 0 || customMinutos <= 0}
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-4 rounded-lg font-bold hover:from-orange-400 hover:to-orange-500 disabled:from-orange-300 disabled:to-orange-400 disabled:opacity-50 transition-all duration-200 shadow-md disabled:shadow-none"
+            >
+              Iniciar Práctica Personalizada
+            </button>
+          </div>
+        )}
         </div>
       </div>
     </div>
   );
-};
-
-export default PracticeTypeModal;
+}

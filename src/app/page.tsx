@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import OnboardingModal from './components/OnboardingModal';
 import ResultsModal from './components/ResultsModal';
 import MarkedText from './components/MarkedText';
+import PracticeTypeModal from './components/PracticeTypeModal';
 
 import { apiService, Prueba, Institucion } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -33,6 +34,7 @@ export default function Home() {
   const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [showPracticeTypeModal, setShowPracticeTypeModal] = useState(false);
   const [practiceResults, setPracticeResults] = useState({
     wpm: 0,
     correctWords: 0,
@@ -54,6 +56,12 @@ export default function Home() {
   const loadRandomText = useCallback(async () => {
     if (isLocked) return; // No cambiar texto durante la práctica
     
+    // No cargar texto si no hay prueba seleccionada
+    if (!currentPrueba && !currentTestInfo) {
+      setPracticeText("");
+      return;
+    }
+    
     console.log('🔄 Cargando texto aleatorio...', { currentPrueba: currentPrueba?.nombre });
     setIsLoadingText(true);
     try {
@@ -68,17 +76,13 @@ export default function Home() {
           console.error('❌ No se encontraron textos para esta prueba');
           setPracticeText("No hay textos disponibles para esta prueba. Selecciona otra práctica.");
         }
+      } else if (currentTestInfo) {
+        // Si hay práctica personalizada, usar el texto ya establecido
+        console.log('📝 Usando texto de práctica personalizada');
+        // El texto ya está establecido por handleCustomPractice
       } else {
-        // Fallback al sistema anterior
-        console.log('📝 Cargando texto genérico');
-        const ejercicio = await apiService.getEjercicioAleatorio();
-        if (ejercicio) {
-          console.log('✅ Texto genérico cargado');
-          setPracticeText(ejercicio.texto.trim());
-        } else {
-          console.error('❌ No se encontraron ejercicios disponibles');
-          setPracticeText("La práctica hace al maestro. Cada día que practicas, mejoras un poco más.");
-        }
+        // No debería llegar aquí, pero por seguridad
+        setPracticeText("");
       }
     } catch (error) {
       console.error('❌ Error cargando texto:', error);
@@ -86,7 +90,7 @@ export default function Home() {
     } finally {
       setIsLoadingText(false);
     }
-  }, [isLocked, currentPrueba]);
+  }, [isLocked, currentPrueba, currentTestInfo]);
 
   // Funciones para cargar instituciones y pruebas
   const loadInstituciones = useCallback(async () => {
@@ -121,18 +125,23 @@ export default function Home() {
     }
   }, [selectedInstitucionId, loadPruebas]);
 
-  // Cargar texto aleatorio al montar el componente
+  // Cargar texto aleatorio al montar el componente solo si hay prueba seleccionada
   useEffect(() => {
-    loadRandomText();
-  }, [loadRandomText]);
+    if (currentPrueba || currentTestInfo) {
+      loadRandomText();
+    }
+  }, [loadRandomText, currentPrueba, currentTestInfo]);
 
   // Cargar texto cuando se selecciona una prueba
   useEffect(() => {
     if (currentPrueba) {
       console.log('🔄 useEffect: currentPrueba cambió, cargando texto...');
       loadRandomText();
+    } else if (!currentTestInfo) {
+      // Limpiar texto cuando no hay prueba seleccionada
+      setPracticeText("");
     }
-  }, [currentPrueba, loadRandomText]);
+  }, [currentPrueba, currentTestInfo, loadRandomText]);
 
 
 
@@ -306,7 +315,10 @@ export default function Home() {
 
 
   // Formatear tiempo mm:ss
-  const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const formatTime = (s: number) => {
+    if (!currentPrueba && !currentTestInfo) return "--:--";
+    return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  };
 
 
 
@@ -339,9 +351,25 @@ export default function Home() {
     });
   };
 
-
-
-
+  // Función para manejar práctica personalizada
+  const handleCustomPractice = (config: {
+    texto: string;
+    objetivoPalabras: number;
+    minutos: number;
+  }) => {
+    console.log('🎯 Práctica personalizada configurada:', config);
+    setCurrentPrueba(null); // Limpiar prueba seleccionada
+    setPracticeText(config.texto);
+    setDurationSeconds(config.minutos * 60);
+    setTimer(config.minutos * 60);
+    
+    // Guardar información de la práctica personalizada para el modal
+    setCurrentTestInfo({
+      minutos: config.minutos,
+      minimo_palabras: config.objetivoPalabras,
+      nombre: 'Práctica Personalizada'
+    });
+  };
 
   const handleInstitucionChange = (institucionId: number) => {
     setSelectedInstitucionId(institucionId);
@@ -372,92 +400,84 @@ export default function Home() {
       <div className="flex flex-col items-center p-2 pt-4 bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30 flex-1 w-full">
         
 
-      {/* Controles y selectores en una sola fila */}
-      <div className="flex w-full max-w-5xl gap-4 mb-4 items-center">
-        {/* Selectores de práctica */}
-        <div className="flex gap-3 flex-1">
-          <select
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            value={selectedInstitucionId || ''}
-            onChange={(e) => handleInstitucionChange(Number(e.target.value))}
-            disabled={isLocked}
-          >
-            <option value="">Institución</option>
-            {instituciones.map((institucion) => (
-              <option key={institucion.id} value={institucion.id}>
-                {institucion.nombre} - {institucion.provincia}
-              </option>
-            ))}
-          </select>
-          
-          <select
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            value={currentPrueba?.id || ''}
-            onChange={(e) => handlePruebaChange(Number(e.target.value))}
-            disabled={!selectedInstitucionId || isLocked}
-          >
-            <option value="">Prueba</option>
-            {pruebas.map((prueba) => (
-              <option key={prueba.id} value={prueba.id}>
-                {prueba.nombre} ({prueba.minutos}min)
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Botones de control */}
-        <div className="flex gap-3 items-center">
-          <button
-            className="px-3 py-2 bg-blue-600 text-white rounded disabled:bg-gray-400 text-sm"
-            onClick={startPractice}
-            disabled={isLocked || !practiceText.trim()}
-          >
-            Iniciar
-          </button>
-          {user?.email === 'julioacostapallud@gmail.com' && (
+      {/* Controles organizados en 2 columnas */}
+      <div className="flex w-full max-w-5xl gap-4 mb-4">
+        {/* Columna IZQUIERDA */}
+        <div className="flex-1 flex flex-col gap-4">
+          {/* Controles superiores - Columna izquierda */}
+          <div className="flex justify-between items-center h-12">
+            {/* Botón Seleccionar Prueba - START */}
             <button
-              className="px-3 py-2 bg-green-600 text-white rounded disabled:bg-gray-400 text-sm"
-              onClick={isDemoRunning ? stopDemo : startDemo}
-              disabled={!practiceText.trim() || (isLocked && !isDemoRunning)}
+              className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 disabled:from-green-300 disabled:to-green-400 disabled:opacity-50 text-sm font-bold transition-all duration-200 shadow-md disabled:shadow-none"
+              onClick={() => setShowPracticeTypeModal(true)}
+              disabled={isLocked}
             >
-              {isDemoRunning ? 'Detener Demo' : 'Demo'}
+              Seleccionar Prueba
             </button>
-          )}
-          <button
-            className="px-3 py-2 bg-gray-500 text-white rounded disabled:bg-gray-300 text-sm"
-            onClick={cancelPractice}
-            disabled={!isLocked}
-          >
-            Cancelar
-          </button>
-          <button
-            className="px-3 py-2 bg-green-600 text-white rounded disabled:bg-gray-400 text-sm"
-            onClick={finishPractice}
-            disabled={!isLocked}
-          >
-            Finalizar
-          </button>
-          <button
-            className="px-3 py-2 bg-purple-600 text-white rounded disabled:bg-gray-400 flex items-center gap-1 text-sm"
-            onClick={loadRandomText}
-            disabled={isLocked || isLoadingText}
-          >
-            <FaRandom className="text-xs" />
-            {isLoadingText ? 'Cargando...' : 'Nuevo'}
-          </button>
+
+            {/* Botón Otro Texto - END */}
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-400 hover:to-orange-500 disabled:from-orange-300 disabled:to-orange-400 disabled:opacity-50 flex items-center gap-1 text-sm font-medium transition-all duration-200 shadow-md disabled:shadow-none"
+              onClick={loadRandomText}
+              disabled={isLocked || isLoadingText || (!currentPrueba && !currentTestInfo)}
+            >
+              <FaRandom className="text-xs" />
+              {isLoadingText ? 'Cargando...' : 'Otro texto'}
+            </button>
+          </div>
         </div>
 
-        {/* Métricas */}
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col items-center">
-            <span className="text-black text-sm font-normal">WPM</span>
-            <span className="font-mono text-2xl text-blue-600 font-bold">{wpm}</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-black text-sm font-normal">Tiempo</span>
-            <span className="flex items-center gap-1 font-mono text-2xl text-red-600 font-bold">
-              <FaRegClock className="text-red-500 text-xl" /> {formatTime(timer)}
-            </span>
+        {/* Columna DERECHA */}
+        <div className="flex-1 flex flex-col gap-4">
+          {/* Controles superiores - Columna derecha */}
+          <div className="flex justify-between items-center h-12">
+            {/* Botones de control - START */}
+            <div className="flex gap-3 items-center">
+              <button
+                className="px-3 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 disabled:from-green-300 disabled:to-green-400 disabled:opacity-50 text-sm font-bold transition-all duration-200 shadow-md disabled:shadow-none"
+                onClick={startPractice}
+                disabled={isLocked || !practiceText.trim() || (!currentPrueba && !currentTestInfo)}
+              >
+                Iniciar
+              </button>
+              {user?.email === 'julioacostapallud@gmail.com' && (
+                <button
+                  className="px-3 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-400 hover:to-orange-500 disabled:from-orange-300 disabled:to-orange-400 disabled:opacity-50 text-sm font-medium transition-all duration-200 shadow-md disabled:shadow-none"
+                  onClick={isDemoRunning ? stopDemo : startDemo}
+                  disabled={!practiceText.trim() || (isLocked && !isDemoRunning) || (!currentPrueba && !currentTestInfo)}
+                >
+                  {isDemoRunning ? 'Detener Demo' : 'Demo'}
+                </button>
+              )}
+              <button
+                className="px-3 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-400 hover:to-gray-500 disabled:from-gray-300 disabled:to-gray-400 disabled:opacity-50 text-sm font-medium transition-all duration-200 shadow-md disabled:shadow-none"
+                onClick={cancelPractice}
+                disabled={!isLocked}
+              >
+                Cancelar
+              </button>
+              <button
+                className="px-3 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 disabled:from-green-300 disabled:to-green-400 disabled:opacity-50 text-sm font-bold transition-all duration-200 shadow-md disabled:shadow-none"
+                onClick={finishPractice}
+                disabled={!isLocked}
+              >
+                Finalizar
+              </button>
+            </div>
+
+            {/* Métricas - END */}
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center">
+                <span className="text-gray-700 text-sm font-medium">WPM</span>
+                <span className="font-mono text-2xl bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent font-bold">{wpm}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-gray-700 text-sm font-medium">Tiempo</span>
+                <span className="flex items-center gap-1 font-mono text-2xl bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent font-bold">
+                  <FaRegClock className="text-orange-500 text-xl" /> {formatTime(timer)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -474,10 +494,10 @@ export default function Home() {
         
         {/* Contenido principal */}
         <div className="flex gap-4 max-w-5xl flex-1">
-          {/* Lado izquierdo: texto a tipear */}
+          {/* Lado izquierdo: texto a copiar */}
           <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-2">
-              <label className="font-semibold">Texto para practicar:</label>
+              <label className="font-bold text-gray-800">Texto a Copiar:</label>
               {isLocked && (
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <span>Progreso:</span>
@@ -501,7 +521,11 @@ export default function Home() {
               />
             ) : (
               <div 
-                className="w-full h-full p-3 border rounded bg-white text-black text-sm leading-tight overflow-y-auto select-none"
+                className={`w-full h-full p-3 border-2 border-gray-200 rounded-lg text-sm leading-tight overflow-y-auto select-none ${
+                  !currentPrueba && !currentTestInfo 
+                    ? 'bg-gray-100' 
+                    : 'bg-white text-black'
+                }`}
                 style={{ 
                   fontSize: '0.875rem', 
                   lineHeight: '1.25rem'
@@ -516,6 +540,10 @@ export default function Home() {
                   <div style={{ whiteSpace: 'pre-wrap' }}>
                     {practiceText}
                   </div>
+                ) : !currentPrueba && !currentTestInfo ? (
+                  <div className="text-gray-400 italic">
+                    Seleccione una prueba para comenzar a practicar
+                  </div>
                 ) : (
                   <span className="text-gray-400 italic">
                     Usa &apos;Nuevo Texto&apos; para cambiar el fragmento...
@@ -524,25 +552,35 @@ export default function Home() {
               </div>
             )}
             <div className="mt-2 text-sm text-gray-600 flex items-center justify-between">
-              <span className="font-semibold text-blue-600">Palabras en el texto: <span className="font-mono text-lg">{practiceText.trim() ? practiceText.trim().split(/\s+/).length : 0}</span></span>
+              <span className="font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Palabras en el texto: <span className="font-mono text-lg">{practiceText.trim() ? practiceText.trim().split(/\s+/).length : 0}</span></span>
               <span className="text-xs text-gray-500 italic">Los saltos de línea se eliminan para mejorar el conteo</span>
             </div>
           </div>
           {/* Lado derecho: input de tipeo */}
           <div className="flex-1 flex flex-col">
-            <label className="font-semibold mb-2">Tipea aquí:</label>
+            <label className="font-bold text-gray-800 mb-2">Tipea aquí:</label>
             <textarea
               ref={inputRef}
-              className="w-full h-full p-3 border rounded resize-none text-sm leading-tight bg-white text-black disabled:bg-gray-100"
+              className={`w-full h-full p-3 border-2 border-gray-200 rounded-lg resize-none text-sm leading-tight ${
+                !currentPrueba && !currentTestInfo 
+                  ? 'bg-gray-100' 
+                  : 'bg-white text-black'
+              } disabled:bg-gray-100`}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onPaste={e => e.preventDefault()}
-              disabled={!isLocked || !isRunning}
-              placeholder={isLocked ? "Empieza a tipear..." : "Inicia la práctica para comenzar"}
+              disabled={!isLocked || !isRunning || (!currentPrueba && !currentTestInfo)}
+              placeholder={
+                !currentPrueba && !currentTestInfo 
+                  ? "Seleccione una prueba para comenzar a practicar" 
+                  : isLocked 
+                    ? "Empieza a tipear..." 
+                    : "Inicia la práctica para comenzar"
+              }
               style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}
             />
             <div className="mt-2 text-sm text-gray-600 flex items-center justify-between">
-              <span className="font-semibold text-green-600">Palabras correctas: <span className="font-mono text-lg">{correctWords}</span></span>
+              <span className="font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">Palabras correctas: <span className="font-mono text-lg">{correctWords}</span></span>
               <span className="text-xs text-gray-500 italic">Solo palabras completas</span>
             </div>
           </div>
@@ -566,6 +604,14 @@ export default function Home() {
         onClose={() => setShowResults(false)}
         results={practiceResults}
         testInfo={currentTestInfo || undefined}
+      />
+
+      {/* Modal de Tipo de Práctica */}
+      <PracticeTypeModal
+        isOpen={showPracticeTypeModal}
+        onClose={() => setShowPracticeTypeModal(false)}
+        onSelectPractice={handleSelectPractice}
+        onCustomPractice={handleCustomPractice}
       />
       
       <Footer />
