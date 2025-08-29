@@ -45,3 +45,4 @@ export default function AdminGuard({ children }: AdminGuardProps) {
   // Si es admin, mostrar el contenido
   return <>{children}</>;
 }
+

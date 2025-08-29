@@ -21,3 +21,4 @@ export default function AdSenseLoader() {
 
   return null; // Este componente no renderiza nada
 }
+

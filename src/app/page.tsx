@@ -8,6 +8,7 @@ import OnboardingModal from './components/OnboardingModal';
 import ResultsModal from './components/ResultsModal';
 import MarkedText from './components/MarkedText';
 import PracticeTypeModal from './components/PracticeTypeModal';
+import AuthModal from './components/AuthModal';
 
 import { apiService, Prueba, Institucion } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -35,6 +36,8 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showPracticeTypeModal, setShowPracticeTypeModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
   const [practiceResults, setPracticeResults] = useState({
     wpm: 0,
     correctWords: 0,
@@ -152,10 +155,10 @@ export default function Home() {
     if (!isAuthenticated && typeof window !== 'undefined') {
       const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
       if (!hasSeenOnboarding) {
-        // Mostrar onboarding después de 5 segundos (menos intrusivo)
+        // Mostrar onboarding después de 1 segundo
         const timer = setTimeout(() => {
           setShowOnboarding(true);
-        }, 5000);
+        }, 1000);
         return () => clearTimeout(timer);
       }
     }
@@ -325,8 +328,9 @@ export default function Home() {
   // Funciones para el onboarding
   const handleOnboardingRegister = () => {
     setShowOnboarding(false);
-    // Redirigir a la página de login
-    window.location.href = '/login';
+    // Abrir modal de autenticación en modo registro
+    setShowAuthModal(true);
+    setAuthMode('register');
   };
 
   const handleOnboardingClose = () => {
@@ -392,6 +396,14 @@ export default function Home() {
         isOpen={showOnboarding}
         onClose={handleOnboardingClose}
         onRegister={handleOnboardingRegister}
+      />
+
+      {/* Modal de Autenticación */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        mode={authMode}
+        setAuthMode={setAuthMode}
       />
       
 
