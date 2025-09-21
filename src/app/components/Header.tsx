@@ -43,6 +43,9 @@ export default function Header() {
             <Link href="/contact" className="text-white hover:text-blue-200 transition-colors font-medium">
               Contacto
             </Link>
+            <Link href="/privacy" className="text-white hover:text-blue-200 transition-colors font-medium">
+              Privacidad
+            </Link>
             {isAdmin && (
               <Link href="/admin" className="text-white hover:text-blue-200 transition-colors font-medium bg-red-600 px-3 py-1 rounded">
                 Admin

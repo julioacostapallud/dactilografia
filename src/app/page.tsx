@@ -10,7 +10,7 @@ import MarkedText from './components/MarkedText';
 import PracticeTypeModal from './components/PracticeTypeModal';
 import AuthModal from './components/AuthModal';
 
-import { apiService, Prueba, Institucion } from '@/lib/api';
+import { apiService, Prueba } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { usePageVisit } from '@/lib/hooks/usePageVisit';
 import AdSenseAd from './components/AdSenseAd';
@@ -30,9 +30,7 @@ export default function Home() {
   const [correctWords, setCorrectWords] = useState(0);
   const [isLoadingText, setIsLoadingText] = useState(false);
   const [currentPrueba, setCurrentPrueba] = useState<Prueba | null>(null);
-  const [instituciones, setInstituciones] = useState<Institucion[]>([]);
   const [pruebas, setPruebas] = useState<Prueba[]>([]);
-  const [selectedInstitucionId, setSelectedInstitucionId] = useState<number | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showPracticeTypeModal, setShowPracticeTypeModal] = useState(false);
@@ -95,38 +93,9 @@ export default function Home() {
     }
   }, [isLocked, currentPrueba, currentTestInfo]);
 
-  // Funciones para cargar instituciones y pruebas
-  const loadInstituciones = useCallback(async () => {
-    try {
-      const data = await apiService.getInstituciones();
-      setInstituciones(data);
-    } catch (error) {
-      console.error('Error cargando instituciones:', error);
-    }
-  }, []);
+  // Funciones para cargar pruebas
 
-  const loadPruebas = useCallback(async (institucionId: number) => {
-    try {
-      const data = await apiService.getPruebas(institucionId);
-      setPruebas(data);
-    } catch (error) {
-      console.error('Error cargando pruebas:', error);
-    }
-  }, []);
-
-  // Cargar instituciones al montar el componente
-  useEffect(() => {
-    loadInstituciones();
-  }, [loadInstituciones]);
-
-  // Cargar pruebas cuando se selecciona una institución
-  useEffect(() => {
-    if (selectedInstitucionId) {
-      loadPruebas(selectedInstitucionId);
-    } else {
-      setPruebas([]);
-    }
-  }, [selectedInstitucionId, loadPruebas]);
+  // Las instituciones y pruebas se cargan desde el modal de práctica
 
   // Cargar texto aleatorio al montar el componente solo si hay prueba seleccionada
   useEffect(() => {
@@ -375,17 +344,7 @@ export default function Home() {
     });
   };
 
-  const handleInstitucionChange = (institucionId: number) => {
-    setSelectedInstitucionId(institucionId);
-    setCurrentPrueba(null); // Limpiar prueba seleccionada
-  };
-
-  const handlePruebaChange = (pruebaId: number) => {
-    const prueba = pruebas.find(p => p.id === pruebaId);
-    if (prueba) {
-      handleSelectPractice(prueba);
-    }
-  };
+  // Las funciones de cambio se manejan en el modal de práctica
 
   return (
     <div className="min-h-screen flex flex-col text-black">
@@ -494,15 +453,19 @@ export default function Home() {
         </div>
       </div>
       <div className="flex w-full h-[75vh] gap-4 justify-center px-4">
-        {/* Sector de publicidad izquierdo */}
-        <div className="w-64 bg-gray-100 border rounded flex items-center justify-center h-[75vh] flex-shrink-0">
-          <div className="text-center text-gray-500">
-            <div className="text-lg font-semibold mb-2">Publicidad</div>
-            <div className="text-sm">Google Ads</div>
-            {/* AdSense Ad Unit - Left Sidebar */}
-            <AdSenseAd adSlot="9852913988" />
+        {/* Sector de publicidad izquierdo - Solo mostrar si hay contenido */}
+        {practiceText.trim() && (currentPrueba || currentTestInfo) ? (
+          <div className="w-64 bg-gray-100 border rounded flex items-center justify-center h-[75vh] flex-shrink-0">
+            <div className="text-center text-gray-500">
+              <div className="text-lg font-semibold mb-2">Publicidad</div>
+              <div className="text-sm">Google Ads</div>
+              {/* AdSense Ad Unit - Left Sidebar */}
+              <AdSenseAd adSlot="9852913988" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-64 flex-shrink-0"></div>
+        )}
         
         {/* Contenido principal */}
         <div className="flex gap-4 max-w-5xl flex-1">
@@ -553,12 +516,25 @@ export default function Home() {
                     {practiceText}
                   </div>
                 ) : !currentPrueba && !currentTestInfo ? (
-                  <div className="text-gray-400 italic">
-                    Seleccione una prueba para comenzar a practicar
+                  <div className="text-gray-600">
+                    <div className="mb-4 text-lg font-semibold text-gray-800">
+                      🎯 ¡Bienvenido a DACTILO!
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <p>• <strong>Mejora tu velocidad de tipeo</strong> con textos legales reales</p>
+                      <p>• <strong>Mide tu progreso</strong> con métricas de WPM (palabras por minuto)</p>
+                      <p>• <strong>Practica con diferentes instituciones</strong> y tipos de documentos</p>
+                      <p>• <strong>Interfaz moderna</strong> optimizada para PC y notebooks</p>
+                    </div>
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-blue-800 font-medium">
+                        👆 Haz clic en <strong>&quot;Seleccionar Prueba&quot;</strong> para comenzar tu primera sesión de práctica
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <span className="text-gray-400 italic">
-                    Usa &apos;Nuevo Texto&apos; para cambiar el fragmento...
+                    Usa &apos;Otro texto&apos; para cambiar el fragmento...
                   </span>
                 )}
               </div>
@@ -598,15 +574,19 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Sector de publicidad derecho */}
-        <div className="w-64 bg-gray-100 border rounded flex items-center justify-center h-[75vh] flex-shrink-0">
-          <div className="text-center text-gray-500">
-            <div className="text-lg font-semibold mb-2">Publicidad</div>
-            <div className="text-sm">Google Ads</div>
-            {/* AdSense Ad Unit - Right Sidebar */}
-            <AdSenseAd adSlot="8179055454" />
+        {/* Sector de publicidad derecho - Solo mostrar si hay contenido */}
+        {practiceText.trim() && (currentPrueba || currentTestInfo) ? (
+          <div className="w-64 bg-gray-100 border rounded flex items-center justify-center h-[75vh] flex-shrink-0">
+            <div className="text-center text-gray-500">
+              <div className="text-lg font-semibold mb-2">Publicidad</div>
+              <div className="text-sm">Google Ads</div>
+              {/* AdSense Ad Unit - Right Sidebar */}
+              <AdSenseAd adSlot="8179055454" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-64 flex-shrink-0"></div>
+        )}
       </div>
       </div>
       

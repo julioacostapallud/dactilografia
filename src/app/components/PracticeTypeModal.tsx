@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaTimes, FaList, FaCog } from 'react-icons/fa';
+import { FaList, FaCog } from 'react-icons/fa';
 import { apiService, Prueba, Institucion } from '@/lib/api';
 
 interface PracticeTypeModalProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import { FaTrophy, FaClock, FaKeyboard, FaTimes } from 'react-icons/fa';
+import { FaTrophy, FaClock, FaKeyboard } from 'react-icons/fa';
 
 interface ResultsModalProps {
   isOpen: boolean;

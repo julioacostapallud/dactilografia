@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { FaChartLine, FaHistory, FaTrophy, FaTimes } from 'react-icons/fa';
+import { FaChartLine, FaHistory, FaTrophy } from 'react-icons/fa';
 
 interface OnboardingModalProps {
   isOpen: boolean;

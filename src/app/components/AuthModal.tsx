@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { FcGoogle } from "react-icons/fc";
-import { FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface AuthModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import AdSenseAd from './AdSenseAd';
+// import AdSenseAd from './AdSenseAd'; // No se usa en dispositivos móviles
 
 export default function DeviceCheck({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -44,13 +44,11 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
   if (isMobile) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50/50 via-blue-100/30 to-green-100/30">
-        {/* Header con publicidad superior */}
-        <div className="w-full bg-gray-100 border-b flex items-center justify-center py-4">
-          <div className="text-center text-gray-500">
-            <div className="text-lg font-semibold mb-2">Publicidad</div>
-            <div className="text-sm">Google Ads</div>
-            {/* AdSense Ad Unit - Mobile Top */}
-            <AdSenseAd adSlot="3645748229" />
+        {/* Header simple sin publicidad */}
+        <div className="w-full bg-gradient-to-r from-green-600 to-orange-600 text-white py-4">
+          <div className="text-center">
+            <h1 className="text-xl font-bold">DACTILO</h1>
+            <p className="text-sm opacity-90">Práctica de Dactilografía</p>
           </div>
         </div>
 
@@ -135,13 +133,10 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
         </div>
         </div>
 
-        {/* Footer con publicidad inferior */}
-        <div className="w-full bg-gray-100 border-t flex items-center justify-center py-4">
-          <div className="text-center text-gray-500">
-            <div className="text-lg font-semibold mb-2">Publicidad</div>
-            <div className="text-sm">Google Ads</div>
-            {/* AdSense Ad Unit - Mobile Bottom */}
-            <AdSenseAd adSlot="9338742817" />
+        {/* Footer simple sin publicidad */}
+        <div className="w-full bg-gradient-to-r from-green-600 to-orange-600 text-white py-3">
+          <div className="text-center">
+            <p className="text-sm opacity-90">© {new Date().getFullYear()} Julio Acosta - DACTILO</p>
           </div>
         </div>
       </div>

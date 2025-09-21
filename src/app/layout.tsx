@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import DeviceCheck from "./components/DeviceCheck";
-import AdSenseLoader from "./components/AdSenseLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -100,7 +99,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#15803d" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3195662668662265" crossOrigin="anonymous"></script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -136,7 +135,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <AdSenseLoader />
           <DeviceCheck>
             {children}
           </DeviceCheck>

@@ -55,3 +55,4 @@ Cuando despliegues en Vercel, configura estas variables en el dashboard de Verce
 - **NUNCA** subas el archivo `.env.local` a Git
 - **Siempre** usa `.env.local.example` como plantilla
 - **Regenera** las credenciales si se comprometen
+
