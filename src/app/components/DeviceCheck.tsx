@@ -13,6 +13,15 @@ export default function DeviceCheck({ children }: { children: React.ReactNode })
     const checkDevice = () => {
       if (typeof window !== 'undefined') {
         const userAgent = navigator.userAgent.toLowerCase();
+        // Permitir bots conocidos incluso si parecen móviles
+        const isBot = /googlebot|bingbot|yandex|baiduspider|duckduckbot|slurp|facebot|facebookexternalhit|twitterbot|linkedinbot|embedly|quora link preview|pinterest|slackbot|whatsapp|telegram/i.test(userAgent);
+        
+        if (isBot) {
+          setIsMobile(false);
+          setIsLoading(false);
+          return;
+        }
+
         const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 768;
         setIsMobile(isMobileDevice);
         setIsLoading(false);

@@ -56,3 +56,4 @@ Cuando despliegues en Vercel, configura estas variables en el dashboard de Verce
 - **Siempre** usa `.env.local.example` como plantilla
 - **Regenera** las credenciales si se comprometen
 
+
